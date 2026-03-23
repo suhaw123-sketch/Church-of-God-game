@@ -240,11 +240,11 @@ body{
 
 .actions{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr;
   gap:10px;
   width:100%;
 }
-button.primary, button.secondary{
+button.primary, button.secondary, button.ghost{
   border:none;
   width:100%;
   min-height:56px;
@@ -260,6 +260,10 @@ button.primary{
 button.secondary{
   background:#eef2ff;
   color:#3730a3;
+}
+button.ghost{
+  background:#e2e8f0;
+  color:#334155;
 }
 
 .overlay{
@@ -445,14 +449,13 @@ button.secondary{
 </head>
 <body>
 
-<!-- 시작화면 -->
 <div class="start-screen" id="startScreen">
   <div class="start-card">
     <div class="start-badge">모바일 풀스크린 퀴즈</div>
     <h1 class="start-title">성경 말씀<br>퀴즈 게임</h1>
     <p class="start-sub">
       원하는 타입과 범위를 고른 뒤 시작해 보세요.<br>
-      모바일에서 더 몰입감 있게 즐길 수 있도록 게임 화면처럼 구성했어요.
+      효과음도 함께 들어가서 더 게임답게 즐길 수 있어요.
     </p>
 
     <div class="home-section">
@@ -500,7 +503,7 @@ button.secondary{
     </div>
 
     <button class="start-main-btn" id="homeStartBtn">▶ 게임 시작</button>
-    <div class="start-tip">시작 후에도 화면 안에서 타입과 범위를 다시 바꿀 수 있어요.</div>
+    <div class="start-tip">오디오 허용이 필요한 브라우저에서는 시작 버튼을 눌러야 효과음이 재생됩니다.</div>
   </div>
 </div>
 
@@ -569,6 +572,7 @@ button.secondary{
         <div class="message" id="message"></div>
         <div class="actions">
           <button class="secondary" id="hintBtn">힌트</button>
+          <button class="ghost" id="soundBtn">🔊 ON</button>
           <button class="primary" id="startBtn">▶ 시작하기</button>
         </div>
       </div>
@@ -595,11 +599,12 @@ button.secondary{
 
     <div class="actions" style="justify-content:center; margin-top:8px;">
       <button class="secondary" id="homeBtn">홈으로</button>
+      <button class="ghost" id="resultSoundBtn">🔊 ON</button>
       <button class="primary" id="restartBtn">다시하기</button>
     </div>
 
     <div class="footnote">
-      타입별 규칙이 실제로 다르게 적용됩니다.
+      정답, 오답, 힌트, 시작, 종료 효과음이 들어가 있습니다.
     </div>
   </div>
 </div>
@@ -631,58 +636,10 @@ const quizBank = [
 ];
 
 const typeConfigs = {
-  A: {
-    label:'A타입',
-    desc:'기본 연습형 퀴즈입니다. 시간 제한 없이 차분하게 문제를 풀 수 있어요.',
-    totalTime:0,
-    showTimeInfinity:true,
-    useCombo:false,
-    autoHint:false,
-    correctBase:10,
-    combo3:10,
-    combo5:10,
-    wrongPenalty:0,
-    rankMode:'practice'
-  },
-  B: {
-    label:'B타입',
-    desc:'점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 60초 동안 랜덤 문제를 풀 수 있어요.',
-    totalTime:60,
-    showTimeInfinity:false,
-    useCombo:true,
-    autoHint:false,
-    correctBase:10,
-    combo3:15,
-    combo5:20,
-    wrongPenalty:5,
-    rankMode:'arcade'
-  },
-  C: {
-    label:'C타입',
-    desc:'학습형 퀴즈입니다. 힌트가 자동으로 표시되고 75초 동안 부담 없이 풀 수 있어요.',
-    totalTime:75,
-    showTimeInfinity:false,
-    useCombo:false,
-    autoHint:true,
-    correctBase:8,
-    combo3:8,
-    combo5:8,
-    wrongPenalty:2,
-    rankMode:'learning'
-  },
-  D: {
-    label:'D타입',
-    desc:'도전형 퀴즈입니다. 45초 안에 빠르게 풀어야 하며 점수 변동이 더 큽니다.',
-    totalTime:45,
-    showTimeInfinity:false,
-    useCombo:true,
-    autoHint:false,
-    correctBase:12,
-    combo3:18,
-    combo5:25,
-    wrongPenalty:7,
-    rankMode:'challenge'
-  }
+  A: { label:'A타입', desc:'기본 연습형 퀴즈입니다. 시간 제한 없이 차분하게 문제를 풀 수 있어요.', totalTime:0, showTimeInfinity:true, useCombo:false, autoHint:false, correctBase:10, combo3:10, combo5:10, wrongPenalty:0, rankMode:'practice' },
+  B: { label:'B타입', desc:'점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 60초 동안 랜덤 문제를 풀 수 있어요.', totalTime:60, showTimeInfinity:false, useCombo:true, autoHint:false, correctBase:10, combo3:15, combo5:20, wrongPenalty:5, rankMode:'arcade' },
+  C: { label:'C타입', desc:'학습형 퀴즈입니다. 힌트가 자동으로 표시되고 75초 동안 부담 없이 풀 수 있어요.', totalTime:75, showTimeInfinity:false, useCombo:false, autoHint:true, correctBase:8, combo3:8, combo5:8, wrongPenalty:2, rankMode:'learning' },
+  D: { label:'D타입', desc:'도전형 퀴즈입니다. 45초 안에 빠르게 풀어야 하며 점수 변동이 더 큽니다.', totalTime:45, showTimeInfinity:false, useCombo:true, autoHint:false, correctBase:12, combo3:18, combo5:25, wrongPenalty:7, rankMode:'challenge' }
 };
 
 const state = {
@@ -697,7 +654,8 @@ const state = {
   correct:0,
   current:null,
   playing:false,
-  usedIndexes:[]
+  usedIndexes:[],
+  soundOn:true
 };
 
 const els = {
@@ -710,6 +668,8 @@ const els = {
   choices:document.getElementById('choices'),
   message:document.getElementById('message'),
   hintBtn:document.getElementById('hintBtn'),
+  soundBtn:document.getElementById('soundBtn'),
+  resultSoundBtn:document.getElementById('resultSoundBtn'),
   startBtn:document.getElementById('startBtn'),
   progressText:document.getElementById('progressText'),
   progressBar:document.getElementById('progressBar'),
@@ -737,6 +697,82 @@ window.addEventListener('resize', setAppHeight);
 window.addEventListener('orientationchange', setAppHeight);
 setAppHeight();
 
+/* ===== 효과음 ===== */
+let audioCtx = null;
+
+function initAudio(){
+  if(audioCtx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!AC) return;
+  audioCtx = new AC();
+}
+
+async function resumeAudio(){
+  if(!audioCtx) initAudio();
+  if(audioCtx && audioCtx.state === 'suspended'){
+    try{ await audioCtx.resume(); }catch(e){}
+  }
+}
+
+function tone(freq=440, duration=0.12, type='sine', volume=0.04, delay=0){
+  if(!state.soundOn || !audioCtx) return;
+  const now = audioCtx.currentTime + delay;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, now);
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(volume, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + duration + 0.02);
+}
+
+function playStartSound(){
+  tone(523.25, 0.10, 'triangle', 0.035, 0.00);
+  tone(659.25, 0.10, 'triangle', 0.035, 0.11);
+  tone(783.99, 0.16, 'triangle', 0.040, 0.22);
+}
+
+function playCorrectSound(){
+  tone(659.25, 0.08, 'triangle', 0.035, 0.00);
+  tone(783.99, 0.10, 'triangle', 0.040, 0.08);
+  tone(987.77, 0.15, 'triangle', 0.045, 0.18);
+}
+
+function playWrongSound(){
+  tone(440.00, 0.10, 'sawtooth', 0.030, 0.00);
+  tone(369.99, 0.14, 'sawtooth', 0.032, 0.10);
+}
+
+function playHintSound(){
+  tone(740.00, 0.08, 'sine', 0.025, 0.00);
+  tone(880.00, 0.10, 'sine', 0.028, 0.08);
+}
+
+function playEndSound(){
+  tone(783.99, 0.12, 'triangle', 0.030, 0.00);
+  tone(659.25, 0.12, 'triangle', 0.030, 0.14);
+  tone(523.25, 0.20, 'triangle', 0.034, 0.28);
+}
+
+function updateSoundButtons(){
+  const txt = state.soundOn ? '🔊 ON' : '🔇 OFF';
+  els.soundBtn.textContent = txt;
+  els.resultSoundBtn.textContent = txt;
+}
+
+function toggleSound(){
+  state.soundOn = !state.soundOn;
+  updateSoundButtons();
+}
+
+/* ===== 게임 ===== */
 function getConfig(){
   return typeConfigs[state.quizType];
 }
@@ -785,6 +821,7 @@ function updateQuizTypeUI(){
   els.hintBtn.style.display = state.quizType === 'C' ? 'none' : 'inline-block';
   syncTypeButtons();
   syncModeButtons();
+  updateSoundButtons();
 }
 
 function resetUIForIdle(){
@@ -895,8 +932,9 @@ function getCorrectScore(){
   return cfg.correctBase;
 }
 
-function answerQuestion(index){
+async function answerQuestion(index){
   if(!state.playing || !state.current) return;
+  await resumeAudio();
 
   const cfg = getConfig();
   const buttons = [...els.choices.querySelectorAll('.choice')];
@@ -921,6 +959,7 @@ function answerQuestion(index){
       els.message.textContent = `정답! +${gained}점`;
     }
     els.message.className = 'message ok';
+    playCorrectSound();
   } else {
     state.combo = 0;
     state.score = Math.max(0, state.score - cfg.wrongPenalty);
@@ -928,6 +967,7 @@ function answerQuestion(index){
     buttons[state.current.answer].classList.add('correct');
     els.message.textContent = `오답! 정답은 “${state.current.answerText}” 입니다.${cfg.wrongPenalty > 0 ? ` -${cfg.wrongPenalty}점` : ''}`;
     els.message.className = 'message bad';
+    playWrongSound();
   }
 
   updateStats();
@@ -939,13 +979,16 @@ function answerQuestion(index){
   }, 800);
 }
 
-function showHint(){
+async function showHint(){
   if(!state.playing || !state.current) return;
+  await resumeAudio();
   els.message.textContent = `힌트: ${state.current.hint}`;
   els.message.className = 'message warn';
+  playHintSound();
 }
 
-function startGame(){
+async function startGame(){
+  await resumeAudio();
   const cfg = getConfig();
   clearInterval(state.timer);
 
@@ -963,6 +1006,7 @@ function startGame(){
   updateStats();
   updateQuizTypeUI();
   renderQuestion();
+  playStartSound();
 
   if(cfg.totalTime > 0){
     state.timer = setInterval(() => {
@@ -1023,6 +1067,7 @@ function endGame(){
   els.resultText.textContent = `총 ${state.answered}문제 중 ${state.correct}문제를 맞혔습니다.`;
   els.overlay.classList.add('show');
   updateStats();
+  playEndSound();
 }
 
 function goHome(){
@@ -1038,6 +1083,8 @@ els.restartBtn.addEventListener('click', startGame);
 els.homeBtn.addEventListener('click', goHome);
 els.hintBtn.addEventListener('click', showHint);
 els.homeStartBtn.addEventListener('click', startGame);
+els.soundBtn.addEventListener('click', async () => { await resumeAudio(); toggleSound(); });
+els.resultSoundBtn.addEventListener('click', async () => { await resumeAudio(); toggleSound(); });
 
 els.modeRow.addEventListener('click', (e) => {
   const btn = e.target.closest('.pill');
