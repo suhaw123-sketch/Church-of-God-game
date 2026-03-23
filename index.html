@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>성경 말씀 퀴즈 게임 B타입</title>
+  <style>
+    :root{
+      --bg1:#0f172a;
+      --bg2:#1e293b;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --accent:#2563eb;
+      --accent2:#7c3aed;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --warn:#f59e0b;
+      --shadow:0 16px 40px rgba(2,6,23,.18);
+      --radius:24px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      color:#fff;
+      background:
+        radial-gradient(circle at top left, rgba(124,58,237,.35), transparent 30%),
+        radial-gradient(circle at top right, rgba(37,99,235,.30), transparent 28%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .app{
+      width:min(980px, 100%);
+      display:grid;
+      gap:16px;
+    }
+
+    .topbar{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:12px;
+    }
+
+    .stat{
+      background:rgba(255,255,255,.10);
+      backdrop-filter: blur(8px);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:20px;
+      padding:14px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat .label{
+      font-size:12px;
+      opacity:.8;
+      margin-bottom:6px;
+    }
+
+    .stat .value{
+      font-size:28px;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+
+    .card{
+      background:var(--card);
+      color:var(--text);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .hero{
+      padding:22px 24px;
+      background:linear-gradient(135deg, #eff6ff, #f5f3ff 55%, #ffffff);
+      border-bottom:1px solid var(--line);
+    }
+
+    .hero h1{
+      margin:0 0 8px;
+      font-size:clamp(24px, 4vw, 38px);
+      line-height:1.1;
+      letter-spacing:-.03em;
+    }
+
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .content{
+      padding:22px;
+      display:grid;
+      gap:16px;
+    }
+
+    .mode-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      border-radius:999px;
+      padding:10px 14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+
+    .pill.active{
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+      color:#fff;
+      border-color:transparent;
+    }
+
+    .question-box{
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:20px;
+      background:#fff;
+    }
+
+    .mini{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .question{
+      font-size:clamp(20px, 3vw, 30px);
+      line-height:1.35;
+      font-weight:800;
+      letter-spacing:-.02em;
+      margin:0;
+    }
+
+    .choices{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .choice{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      text-align:left;
+      background:#fff;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+    }
+
+    .choice:hover:not(:disabled){
+      transform:translateY(-2px);
+      border-color:#cbd5e1;
+      box-shadow:0 12px 24px rgba(15,23,42,.08);
+    }
+
+    .choice:disabled{ cursor:default; }
+    .choice.correct{ background:#f0fdf4; border-color:#86efac; color:#166534; }
+    .choice.wrong{ background:#fef2f2; border-color:#fca5a5; color:#991b1b; }
+
+    .bottom{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .message{
+      min-height:24px;
+      font-weight:800;
+      font-size:15px;
+    }
+
+    .message.ok{ color:var(--ok); }
+    .message.bad{ color:var(--bad); }
+    .message.warn{ color:var(--warn); }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button.primary, button.secondary{
+      border:none;
+      border-radius:16px;
+      padding:13px 18px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+
+    button.primary{
+      color:#fff;
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+    }
+
+    button.secondary{
+      background:#eef2ff;
+      color:#3730a3;
+    }
+
+    button.primary:hover, button.secondary:hover{ transform:translateY(-1px); }
+
+    .progress-wrap{
+      display:grid;
+      gap:8px;
+    }
+
+    .progress-label{
+      display:flex;
+      justify-content:space-between;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .progress{
+      height:12px;
+      background:#e2e8f0;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .progress > div{
+      height:100%;
+      width:100%;
+      background:linear-gradient(90deg, var(--accent), var(--accent2));
+      transition:width .25s linear;
+    }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:rgba(2,6,23,.55);
+      backdrop-filter: blur(8px);
+    }
+
+    .overlay.show{ display:flex; }
+
+    .result{
+      width:min(540px, 100%);
+      background:#fff;
+      color:var(--text);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:26px;
+      text-align:center;
+    }
+
+    .rank{
+      font-size:54px;
+      font-weight:900;
+      letter-spacing:-.05em;
+      margin:0 0 8px;
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .result h2{
+      margin:0 0 10px;
+      font-size:28px;
+    }
+
+    .result p{
+      margin:6px 0;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .result-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin:20px 0;
+    }
+
+    .result-item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      background:#fafafa;
+    }
+
+    .result-item .k{ color:var(--muted); font-size:12px; font-weight:700; margin-bottom:6px; }
+    .result-item .v{ font-size:28px; font-weight:900; }
+
+    .footnote{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      margin-top:10px;
+    }
+
+    @media (max-width: 760px){
+      .topbar{ grid-template-columns:1fr 1fr; }
+      .choices{ grid-template-columns:1fr; }
+      .content{ padding:16px; }
+      .hero{ padding:18px; }
+      .result-grid{ grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="stat">
+        <div class="label">점수</div>
+        <div class="value" id="score">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">남은 시간</div>
+        <div class="value" id="time">60</div>
+      </div>
+      <div class="stat">
+        <div class="label">콤보</div>
+        <div class="value" id="combo">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">정답률</div>
+        <div class="value" id="accuracy">0%</div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="hero">
+        <h1>성경 말씀 퀴즈 게임 <span style="color:#4f46e5">B타입</span></h1>
+        <p>점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 시작 버튼을 누르면 60초 동안 랜덤 문제를 풀 수 있어요.</p>
+      </div>
+
+      <div class="content">
+        <div class="mode-row" id="modeRow">
+          <button class="pill active" data-mode="mixed">전체</button>
+          <button class="pill" data-mode="old">구약</button>
+          <button class="pill" data-mode="new">신약</button>
+          <button class="pill" data-mode="theme">주제</button>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>게임 진행</span>
+            <span id="progressText">대기 중</span>
+          </div>
+          <div class="progress"><div id="progressBar"></div></div>
+        </div>
+
+        <div class="question-box">
+          <div class="mini" id="qMeta">준비 완료</div>
+          <p class="question" id="question">시작 버튼을 누르면 문제가 나옵니다.</p>
+        </div>
+
+        <div class="choices" id="choices">
+          <button class="choice" disabled>A. 보기 1</button>
+          <button class="choice" disabled>B. 보기 2</button>
+          <button class="choice" disabled>C. 보기 3</button>
+          <button class="choice" disabled>D. 보기 4</button>
+        </div>
+
+        <div class="bottom">
+          <div class="message" id="message"></div>
+          <div class="actions">
+            <button class="secondary" id="hintBtn">힌트</button>
+            <button class="primary" id="startBtn">게임 시작</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="result">
+      <div class="rank" id="rank">A</div>
+      <h2>게임 종료</h2>
+      <p id="resultText">수고하셨습니다.</p>
+
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="k">최종 점수</div>
+          <div class="v" id="finalScore">0</div>
+        </div>
+        <div class="result-item">
+          <div class="k">정답률</div>
+          <div class="v" id="finalAccuracy">0%</div>
+        </div>
+      </div>
+
+      <div class="actions" style="justify-content:center; margin-top:8px;">
+        <button class="secondary" id="closeBtn">닫기</button>
+        <button class="primary" id="restartBtn">다시하기</button>
+      </div>
+
+      <div class="footnote">
+        문제 문장은 게임용으로 짧게 구성했습니다. 필요하면 다음 단계에서 난이도 추가, 문제 수 확대, 말씀 구절형 문제, 모바일 전용 UI로 확장할 수 있습니다.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const quizBank = [
+      {
+        mode:"old",
+        type:"인물",
+        question:"노아가 만든 것은 무엇일까요?",
+        choices:["방주","성막","돌판","우물"],
+        answer:0,
+        hint:"홍수와 관련된 이야기입니다."
+      },
+      {
+        mode:"old",
+        type:"장소",
+        question:"모세가 십계명을 받은 산은 어디일까요?",
+        choices:["감람산","시내산","갈멜산","헤르몬산"],
+        answer:1,
+        hint:"출애굽 후 중요한 장면입니다."
+      },
+      {
+        mode:"old",
+        type:"인물",
+        question:"골리앗과 맞선 인물은 누구일까요?",
+        choices:["사울","솔로몬","다윗","엘리야"],
+        answer:2,
+        hint:"훗날 왕이 됩니다."
+      },
+      {
+        mode:"old",
+        type:"책",
+        question:"시편은 주로 어떤 형식으로 이루어져 있을까요?",
+        choices:["예언","편지","노래와 기도","역사 기록"],
+        answer:2,
+        hint:"찬양과 관련이 깊습니다."
+      },
+      {
+        mode:"old",
+        type:"사건",
+        question:"여리고 성은 어떻게 무너졌을까요?",
+        choices:["지진으로","불로","군사 공격으로","하나님의 명령에 따른 행진 후"],
+        answer:3,
+        hint:"나팔 소리가 등장합니다."
+      },
+      {
+        mode:"old",
+        type:"인물",
+        question:"사자굴에 들어갔지만 보호받은 인물은 누구일까요?",
+        choices:["다니엘","요셉","사무엘","욥"],
+        answer:0,
+        hint:"기도하는 인물로 잘 알려져 있습니다."
+      },
+      {
+        mode:"old",
+        type:"인물",
+        question:"큰 물고기 이야기와 관련된 선지자는 누구일까요?",
+        choices:["요나","이사야","예레미야","호세아"],
+        answer:0,
+        hint:"니느웨와 연결됩니다."
+      },
+      {
+        mode:"old",
+        type:"인물",
+        question:"애굽 총리가 된 인물은 누구일까요?",
+        choices:["아브라함","요셉","이삭","야곱"],
+        answer:1,
+        hint:"채색옷 이야기가 떠오릅니다."
+      },
+      {
+        mode:"new",
+        type:"인물",
+        question:"예수님을 낳은 마리아의 남편 이름은 무엇일까요?",
+        choices:["야고보","요셉","사가랴","안드레"],
+        answer:1,
+        hint:"목수와 관련된 이미지가 있습니다."
+      },
+      {
+        mode:"new",
+        type:"장소",
+        question:"예수님께서 물을 포도주로 바꾸신 곳은 어디일까요?",
+        choices:["가버나움","예루살렘","가나","벳새다"],
+        answer:2,
+        hint:"혼인잔치가 열렸던 곳입니다."
+      },
+      {
+        mode:"new",
+        type:"인물",
+        question:"예수님의 제자 중 세 번 부인한 인물은 누구일까요?",
+        choices:["베드로","요한","빌립","도마"],
+        answer:0,
+        hint:"닭 울음과 연결됩니다."
+      },
+      {
+        mode:"new",
+        type:"책",
+        question:"초대교회 활동과 전도가 많이 기록된 책은 무엇일까요?",
+        choices:["로마서","사도행전","히브리서","야고보서"],
+        answer:1,
+        hint:"사도들의 행적을 다룹니다."
+      },
+      {
+        mode:"new",
+        type:"주제",
+        question:"사랑장으로 잘 알려진 장은 어느 책에 있을까요?",
+        choices:["고린도전서","갈라디아서","에베소서","빌립보서"],
+        answer:0,
+        hint:"13장이 유명합니다."
+      },
+      {
+        mode:"new",
+        type:"인물",
+        question:"다메섹 길에서 큰 변화를 겪은 인물은 누구일까요?",
+        choices:["바울","디모데","바나바","실라"],
+        answer:0,
+        hint:"처음에는 교회를 핍박했습니다."
+      },
+      {
+        mode:"new",
+        type:"사건",
+        question:"오순절 성령 강림과 가장 직접 관련된 사건은 무엇일까요?",
+        choices:["바다를 건넘","방언과 담대한 전파","성전 재건","감옥 탈출"],
+        answer:1,
+        hint:"초대교회 시작의 상징 같은 장면입니다."
+      },
+      {
+        mode:"new",
+        type:"책",
+        question:"예수님의 탄생 이야기와 비유가 많이 담긴 복음서는 무엇일까요?",
+        choices:["마태복음","마가복음","누가복음","요한복음"],
+        answer:2,
+        hint:"의사로 알려진 저자와 연결됩니다."
+      },
+      {
+        mode:"theme",
+        type:"주제",
+        question:"믿음, 소망, 사랑 중 가장 크다고 강조되는 것은 무엇일까요?",
+        choices:["믿음","소망","사랑","지혜"],
+        answer:2,
+        hint:"많은 사람이 암송하는 주제입니다."
+      },
+      {
+        mode:"theme",
+        type:"주제",
+        question:"기도할 때 가장 먼저 떠오르는 모범기도는 무엇일까요?",
+        choices:["축복기도","주기도문","감사기도","회개기도"],
+        answer:1,
+        hint:"하늘에 계신 아버지로 시작합니다."
+      },
+      {
+        mode:"theme",
+        type:"상징",
+        question:"빛과 소금은 주로 누구를 가리키는 표현일까요?",
+        choices:["왕들","제사장","제자들","천사들"],
+        answer:2,
+        hint:"세상 속에서 역할을 말합니다."
+      },
+      {
+        mode:"theme",
+        type:"주제",
+        question:"잃은 양 비유가 전하는 핵심은 무엇일까요?",
+        choices:["부의 축적","잃은 자를 찾는 기쁨","전쟁 준비","지식 경쟁"],
+        answer:1,
+        hint:"찾아낸 후 기뻐하는 장면이 있습니다."
+      },
+      {
+        mode:"theme",
+        type:"주제",
+        question:"선한 사마리아인 비유의 핵심은 무엇일까요?",
+        choices:["외모 판단","이웃 사랑의 실천","재산 보호","여행 준비"],
+        answer:1,
+        hint:"도와준 사람이 누구였는지 떠올려 보세요."
+      },
+      {
+        mode:"mixed",
+        type:"말씀 개념",
+        question:"성경에서 자주 강조되는 덕목 조합으로 가장 알맞은 것은 무엇일까요?",
+        choices:["권력, 경쟁, 성공","믿음, 소망, 사랑","속도, 효율, 성과","부, 명예, 인기"],
+        answer:1,
+        hint:"신약에서 많이 알려진 조합입니다."
+      }
+    ];
+
+    const els = {
+      score: document.getElementById('score'),
+      time: document.getElementById('time'),
+      combo: document.getElementById('combo'),
+      accuracy: document.getElementById('accuracy'),
+      qMeta: document.getElementById('qMeta'),
+      question: document.getElementById('question'),
+      choices: document.getElementById('choices'),
+      message: document.getElementById('message'),
+      hintBtn: document.getElementById('hintBtn'),
+      startBtn: document.getElementById('startBtn'),
+      progressText: document.getElementById('progressText'),
+      progressBar: document.getElementById('progressBar'),
+      overlay: document.getElementById('overlay'),
+      finalScore: document.getElementById('finalScore'),
+      finalAccuracy: document.getElementById('finalAccuracy'),
+      rank: document.getElementById('rank'),
+      resultText: document.getElementById('resultText'),
+      restartBtn: document.getElementById('restartBtn'),
+      closeBtn: document.getElementById('closeBtn'),
+      modeRow: document.getElementById('modeRow')
+    };
+
+    const state = {
+      selectedMode: 'mixed',
+      timer: null,
+      totalTime: 60,
+      timeLeft: 60,
+      score: 0,
+      combo: 0,
+      answered: 0,
+      correct: 0,
+      current: null,
+      playing: false,
+      usedIndexes: []
+    };
+
+    function shuffle(arr){
+      const copy = [...arr];
+      for(let i = copy.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getPool(){
+      if(state.selectedMode === 'mixed') return quizBank;
+      return quizBank.filter(q => q.mode === state.selectedMode || q.mode === 'mixed');
+    }
+
+    function resetUIForIdle(){
+      els.qMeta.textContent = '준비 완료';
+      els.question.textContent = '시작 버튼을 누르면 문제가 나옵니다.';
+      els.choices.innerHTML = ['A. 보기 1','B. 보기 2','C. 보기 3','D. 보기 4']
+        .map(t => `<button class="choice" disabled>${t}</button>`).join('');
+      els.message.textContent = '';
+      els.message.className = 'message';
+      els.progressText.textContent = '대기 중';
+      els.progressBar.style.width = '100%';
+    }
+
+    function updateStats(){
+      els.score.textContent = state.score;
+      els.time.textContent = state.timeLeft;
+      els.combo.textContent = state.combo;
+      const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
+      els.accuracy.textContent = `${accuracy}%`;
+      els.progressText.textContent = state.playing ? `${state.totalTime - state.timeLeft}초 진행` : '대기 중';
+      els.progressBar.style.width = `${(state.timeLeft / state.totalTime) * 100}%`;
+    }
+
+    function buildQuestion(){
+      const pool = getPool();
+      if(pool.length === 0) return null;
+
+      let candidates = pool.map((q, idx) => ({q, idx})).filter(item => !state.usedIndexes.includes(item.idx + '_' + state.selectedMode));
+      if(candidates.length === 0){
+        state.usedIndexes = [];
+        candidates = pool.map((q, idx) => ({q, idx}));
+      }
+      const picked = candidates[Math.floor(Math.random() * candidates.length)];
+      state.usedIndexes.push(picked.idx + '_' + state.selectedMode);
+
+      const original = picked.q;
+      const answerText = original.choices[original.answer];
+      const shuffledChoices = shuffle(original.choices.map((text, i) => ({text, correct: i === original.answer})));
+      const newAnswerIndex = shuffledChoices.findIndex(c => c.correct);
+
+      return {
+        type: original.type,
+        mode: original.mode,
+        question: original.question,
+        hint: original.hint,
+        choices: shuffledChoices.map(c => c.text),
+        answer: newAnswerIndex,
+        answerText
+      };
+    }
+
+    function renderQuestion(){
+      state.current = buildQuestion();
+      if(!state.current) return;
+
+      els.qMeta.textContent = `${labelMode(state.selectedMode)} · ${state.current.type}`;
+      els.question.textContent = state.current.question;
+      els.message.textContent = '';
+      els.message.className = 'message';
+
+      els.choices.innerHTML = state.current.choices.map((choice, idx) => {
+        const alpha = ['A','B','C','D'][idx] || '';
+        return `<button class="choice" data-index="${idx}">${alpha}. ${choice}</button>`;
+      }).join('');
+
+      [...els.choices.querySelectorAll('.choice')].forEach(btn => {
+        btn.addEventListener('click', () => answerQuestion(Number(btn.dataset.index)));
+      });
+    }
+
+    function labelMode(mode){
+      return ({ mixed:'전체', old:'구약', new:'신약', theme:'주제' })[mode] || '전체';
+    }
+
+    function answerQuestion(index){
+      if(!state.playing || !state.current) return;
+
+      const buttons = [...els.choices.querySelectorAll('.choice')];
+      buttons.forEach(b => b.disabled = true);
+      state.answered += 1;
+
+      if(index === state.current.answer){
+        state.correct += 1;
+        state.combo += 1;
+        const gained = state.combo >= 5 ? 20 : state.combo >= 3 ? 15 : 10;
+        state.score += gained;
+        buttons[index].classList.add('correct');
+        els.message.textContent = `정답! +${gained}점${state.combo >= 3 ? ` · ${state.combo}콤보` : ''}`;
+        els.message.className = 'message ok';
+      } else {
+        state.combo = 0;
+        state.score = Math.max(0, state.score - 5);
+        buttons[index].classList.add('wrong');
+        buttons[state.current.answer].classList.add('correct');
+        els.message.textContent = `오답! 정답은 “${state.current.answerText}” 입니다. -5점`;
+        els.message.className = 'message bad';
+      }
+
+      updateStats();
+      setTimeout(() => {
+        if(state.playing && state.timeLeft > 0){
+          renderQuestion();
+        }
+      }, 800);
+    }
+
+    function showHint(){
+      if(!state.playing || !state.current) return;
+      els.message.textContent = `힌트: ${state.current.hint}`;
+      els.message.className = 'message warn';
+    }
+
+    function startGame(){
+      clearInterval(state.timer);
+      state.playing = true;
+      state.timeLeft = state.totalTime;
+      state.score = 0;
+      state.combo = 0;
+      state.answered = 0;
+      state.correct = 0;
+      state.usedIndexes = [];
+      els.overlay.classList.remove('show');
+      updateStats();
+      renderQuestion();
+
+      state.timer = setInterval(() => {
+        state.timeLeft -= 1;
+        updateStats();
+        if(state.timeLeft <= 0){
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function getRank(score, accuracy){
+      if(score >= 180 && accuracy >= 85) return 'S';
+      if(score >= 130 && accuracy >= 75) return 'A';
+      if(score >= 90 && accuracy >= 60) return 'B';
+      if(score >= 50 && accuracy >= 45) return 'C';
+      return 'D';
+    }
+
+    function endGame(){
+      clearInterval(state.timer);
+      state.playing = false;
+      [...els.choices.querySelectorAll('.choice')].forEach(b => b.disabled = true);
+
+      const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
+      const rank = getRank(state.score, accuracy);
+
+      els.finalScore.textContent = state.score;
+      els.finalAccuracy.textContent = `${accuracy}%`;
+      els.rank.textContent = rank;
+      els.resultText.textContent = `총 ${state.answered}문제 중 ${state.correct}문제를 맞혔습니다.`;
+      els.overlay.classList.add('show');
+      updateStats();
+    }
+
+    els.startBtn.addEventListener('click', startGame);
+    els.restartBtn.addEventListener('click', startGame);
+    els.closeBtn.addEventListener('click', () => els.overlay.classList.remove('show'));
+    els.hintBtn.addEventListener('click', showHint);
+
+    els.modeRow.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill');
+      if(!btn) return;
+      [...els.modeRow.querySelectorAll('.pill')].forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.selectedMode = btn.dataset.mode;
+      if(!state.playing) resetUIForIdle();
+    });
+
+    updateStats();
+    resetUIForIdle();
+  </script>
+</body>
+</html>
