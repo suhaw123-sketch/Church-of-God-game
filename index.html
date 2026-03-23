@@ -25,7 +25,7 @@
     html,body{ height:100%; }
     body{
       margin:0;
-      font-family: "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      font-family:"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
       color:#fff;
       background:
         radial-gradient(circle at top left, rgba(124,58,237,.35), transparent 30%),
@@ -45,17 +45,17 @@
 
     .topbar{
       display:grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns:repeat(4, 1fr);
       gap:12px;
     }
 
     .stat{
       background:rgba(255,255,255,.10);
-      backdrop-filter: blur(8px);
+      backdrop-filter:blur(8px);
       border:1px solid rgba(255,255,255,.14);
       border-radius:20px;
       padding:14px 16px;
-      box-shadow: var(--shadow);
+      box-shadow:var(--shadow);
     }
 
     .stat .label{
@@ -103,6 +103,7 @@
       gap:16px;
     }
 
+    .type-row,
     .mode-row{
       display:flex;
       gap:10px;
@@ -257,7 +258,7 @@
       justify-content:center;
       padding:20px;
       background:rgba(2,6,23,.55);
-      backdrop-filter: blur(8px);
+      backdrop-filter:blur(8px);
     }
 
     .overlay.show{ display:flex; }
@@ -307,8 +308,17 @@
       background:#fafafa;
     }
 
-    .result-item .k{ color:var(--muted); font-size:12px; font-weight:700; margin-bottom:6px; }
-    .result-item .v{ font-size:28px; font-weight:900; }
+    .result-item .k{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .result-item .v{
+      font-size:28px;
+      font-weight:900;
+    }
 
     .footnote{
       color:var(--muted);
@@ -317,7 +327,7 @@
       margin-top:10px;
     }
 
-    @media (max-width: 760px){
+    @media (max-width:760px){
       .topbar{ grid-template-columns:1fr 1fr; }
       .choices{ grid-template-columns:1fr; }
       .content{ padding:16px; }
@@ -335,7 +345,7 @@
       </div>
       <div class="stat">
         <div class="label">남은 시간</div>
-        <div class="value" id="time">60</div>
+        <div class="value" id="time">∞</div>
       </div>
       <div class="stat">
         <div class="label">콤보</div>
@@ -349,11 +359,18 @@
 
     <section class="card">
       <div class="hero">
-        <h1>성경 말씀 퀴즈 게임 <span style="color:#4f46e5">START</span></h1>
-        <p>점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 시작 버튼을 누르면 60초 동안 랜덤 문제를 풀 수 있어요.</p>
+        <h1>성경 말씀 퀴즈 게임 <span id="quizTypeLabel" style="color:#4f46e5">B타입</span></h1>
+        <p id="quizTypeDesc">점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 시작 버튼을 누르면 60초 동안 랜덤 문제를 풀 수 있어요.</p>
       </div>
 
       <div class="content">
+        <div class="type-row" id="typeRow">
+          <button class="pill" data-type="A">A타입</button>
+          <button class="pill active" data-type="B">B타입</button>
+          <button class="pill" data-type="C">C타입</button>
+          <button class="pill" data-type="D">D타입</button>
+        </div>
+
         <div class="mode-row" id="modeRow">
           <button class="pill active" data-mode="mixed">전체</button>
           <button class="pill" data-mode="old">구약</button>
@@ -415,189 +432,35 @@
       </div>
 
       <div class="footnote">
-        문제 문장은 게임용으로 짧게 구성했습니다. 필요하면 다음 단계에서 난이도 추가, 문제 수 확대, 말씀 구절형 문제, 모바일 전용 UI로 확장할 수 있습니다.
+        A/B/C/D 타입 선택이 실제로 적용됩니다. 필요하면 다음 단계에서 타입별 문제를 아예 따로 분리해 더 전문적으로 확장할 수 있습니다.
       </div>
     </div>
   </div>
 
   <script>
     const quizBank = [
-      {
-        mode:"old",
-        type:"인물",
-        question:"노아가 만든 것은 무엇일까요?",
-        choices:["방주","성막","돌판","우물"],
-        answer:0,
-        hint:"홍수와 관련된 이야기입니다."
-      },
-      {
-        mode:"old",
-        type:"장소",
-        question:"모세가 십계명을 받은 산은 어디일까요?",
-        choices:["감람산","시내산","갈멜산","헤르몬산"],
-        answer:1,
-        hint:"출애굽 후 중요한 장면입니다."
-      },
-      {
-        mode:"old",
-        type:"인물",
-        question:"골리앗과 맞선 인물은 누구일까요?",
-        choices:["사울","솔로몬","다윗","엘리야"],
-        answer:2,
-        hint:"훗날 왕이 됩니다."
-      },
-      {
-        mode:"old",
-        type:"책",
-        question:"시편은 주로 어떤 형식으로 이루어져 있을까요?",
-        choices:["예언","편지","노래와 기도","역사 기록"],
-        answer:2,
-        hint:"찬양과 관련이 깊습니다."
-      },
-      {
-        mode:"old",
-        type:"사건",
-        question:"여리고 성은 어떻게 무너졌을까요?",
-        choices:["지진으로","불로","군사 공격으로","하나님의 명령에 따른 행진 후"],
-        answer:3,
-        hint:"나팔 소리가 등장합니다."
-      },
-      {
-        mode:"old",
-        type:"인물",
-        question:"사자굴에 들어갔지만 보호받은 인물은 누구일까요?",
-        choices:["다니엘","요셉","사무엘","욥"],
-        answer:0,
-        hint:"기도하는 인물로 잘 알려져 있습니다."
-      },
-      {
-        mode:"old",
-        type:"인물",
-        question:"큰 물고기 이야기와 관련된 선지자는 누구일까요?",
-        choices:["요나","이사야","예레미야","호세아"],
-        answer:0,
-        hint:"니느웨와 연결됩니다."
-      },
-      {
-        mode:"old",
-        type:"인물",
-        question:"애굽 총리가 된 인물은 누구일까요?",
-        choices:["아브라함","요셉","이삭","야곱"],
-        answer:1,
-        hint:"채색옷 이야기가 떠오릅니다."
-      },
-      {
-        mode:"new",
-        type:"인물",
-        question:"예수님을 낳은 마리아의 남편 이름은 무엇일까요?",
-        choices:["야고보","요셉","사가랴","안드레"],
-        answer:1,
-        hint:"목수와 관련된 이미지가 있습니다."
-      },
-      {
-        mode:"new",
-        type:"장소",
-        question:"예수님께서 물을 포도주로 바꾸신 곳은 어디일까요?",
-        choices:["가버나움","예루살렘","가나","벳새다"],
-        answer:2,
-        hint:"혼인잔치가 열렸던 곳입니다."
-      },
-      {
-        mode:"new",
-        type:"인물",
-        question:"예수님의 제자 중 세 번 부인한 인물은 누구일까요?",
-        choices:["베드로","요한","빌립","도마"],
-        answer:0,
-        hint:"닭 울음과 연결됩니다."
-      },
-      {
-        mode:"new",
-        type:"책",
-        question:"초대교회 활동과 전도가 많이 기록된 책은 무엇일까요?",
-        choices:["로마서","사도행전","히브리서","야고보서"],
-        answer:1,
-        hint:"사도들의 행적을 다룹니다."
-      },
-      {
-        mode:"new",
-        type:"주제",
-        question:"사랑장으로 잘 알려진 장은 어느 책에 있을까요?",
-        choices:["고린도전서","갈라디아서","에베소서","빌립보서"],
-        answer:0,
-        hint:"13장이 유명합니다."
-      },
-      {
-        mode:"new",
-        type:"인물",
-        question:"다메섹 길에서 큰 변화를 겪은 인물은 누구일까요?",
-        choices:["바울","디모데","바나바","실라"],
-        answer:0,
-        hint:"처음에는 교회를 핍박했습니다."
-      },
-      {
-        mode:"new",
-        type:"사건",
-        question:"오순절 성령 강림과 가장 직접 관련된 사건은 무엇일까요?",
-        choices:["바다를 건넘","방언과 담대한 전파","성전 재건","감옥 탈출"],
-        answer:1,
-        hint:"초대교회 시작의 상징 같은 장면입니다."
-      },
-      {
-        mode:"new",
-        type:"책",
-        question:"예수님의 탄생 이야기와 비유가 많이 담긴 복음서는 무엇일까요?",
-        choices:["마태복음","마가복음","누가복음","요한복음"],
-        answer:2,
-        hint:"의사로 알려진 저자와 연결됩니다."
-      },
-      {
-        mode:"theme",
-        type:"주제",
-        question:"믿음, 소망, 사랑 중 가장 크다고 강조되는 것은 무엇일까요?",
-        choices:["믿음","소망","사랑","지혜"],
-        answer:2,
-        hint:"많은 사람이 암송하는 주제입니다."
-      },
-      {
-        mode:"theme",
-        type:"주제",
-        question:"기도할 때 가장 먼저 떠오르는 모범기도는 무엇일까요?",
-        choices:["축복기도","주기도문","감사기도","회개기도"],
-        answer:1,
-        hint:"하늘에 계신 아버지로 시작합니다."
-      },
-      {
-        mode:"theme",
-        type:"상징",
-        question:"빛과 소금은 주로 누구를 가리키는 표현일까요?",
-        choices:["왕들","제사장","제자들","천사들"],
-        answer:2,
-        hint:"세상 속에서 역할을 말합니다."
-      },
-      {
-        mode:"theme",
-        type:"주제",
-        question:"잃은 양 비유가 전하는 핵심은 무엇일까요?",
-        choices:["부의 축적","잃은 자를 찾는 기쁨","전쟁 준비","지식 경쟁"],
-        answer:1,
-        hint:"찾아낸 후 기뻐하는 장면이 있습니다."
-      },
-      {
-        mode:"theme",
-        type:"주제",
-        question:"선한 사마리아인 비유의 핵심은 무엇일까요?",
-        choices:["외모 판단","이웃 사랑의 실천","재산 보호","여행 준비"],
-        answer:1,
-        hint:"도와준 사람이 누구였는지 떠올려 보세요."
-      },
-      {
-        mode:"mixed",
-        type:"말씀 개념",
-        question:"성경에서 자주 강조되는 덕목 조합으로 가장 알맞은 것은 무엇일까요?",
-        choices:["권력, 경쟁, 성공","믿음, 소망, 사랑","속도, 효율, 성과","부, 명예, 인기"],
-        answer:1,
-        hint:"신약에서 많이 알려진 조합입니다."
-      }
+      { mode:"old", type:"인물", question:"노아가 만든 것은 무엇일까요?", choices:["방주","성막","돌판","우물"], answer:0, hint:"홍수와 관련된 이야기입니다." },
+      { mode:"old", type:"장소", question:"모세가 십계명을 받은 산은 어디일까요?", choices:["감람산","시내산","갈멜산","헤르몬산"], answer:1, hint:"출애굽 후 중요한 장면입니다." },
+      { mode:"old", type:"인물", question:"골리앗과 맞선 인물은 누구일까요?", choices:["사울","솔로몬","다윗","엘리야"], answer:2, hint:"훗날 왕이 됩니다." },
+      { mode:"old", type:"책", question:"시편은 주로 어떤 형식으로 이루어져 있을까요?", choices:["예언","편지","노래와 기도","역사 기록"], answer:2, hint:"찬양과 관련이 깊습니다." },
+      { mode:"old", type:"사건", question:"여리고 성은 어떻게 무너졌을까요?", choices:["지진으로","불로","군사 공격으로","하나님의 명령에 따른 행진 후"], answer:3, hint:"나팔 소리가 등장합니다." },
+      { mode:"old", type:"인물", question:"사자굴에 들어갔지만 보호받은 인물은 누구일까요?", choices:["다니엘","요셉","사무엘","욥"], answer:0, hint:"기도하는 인물로 잘 알려져 있습니다." },
+      { mode:"old", type:"인물", question:"큰 물고기 이야기와 관련된 선지자는 누구일까요?", choices:["요나","이사야","예레미야","호세아"], answer:0, hint:"니느웨와 연결됩니다." },
+      { mode:"old", type:"인물", question:"애굽 총리가 된 인물은 누구일까요?", choices:["아브라함","요셉","이삭","야곱"], answer:1, hint:"채색옷 이야기가 떠오릅니다." },
+      { mode:"new", type:"인물", question:"예수님을 낳은 마리아의 남편 이름은 무엇일까요?", choices:["야고보","요셉","사가랴","안드레"], answer:1, hint:"목수와 관련된 이미지가 있습니다." },
+      { mode:"new", type:"장소", question:"예수님께서 물을 포도주로 바꾸신 곳은 어디일까요?", choices:["가버나움","예루살렘","가나","벳새다"], answer:2, hint:"혼인잔치가 열렸던 곳입니다." },
+      { mode:"new", type:"인물", question:"예수님의 제자 중 세 번 부인한 인물은 누구일까요?", choices:["베드로","요한","빌립","도마"], answer:0, hint:"닭 울음과 연결됩니다." },
+      { mode:"new", type:"책", question:"초대교회 활동과 전도가 많이 기록된 책은 무엇일까요?", choices:["로마서","사도행전","히브리서","야고보서"], answer:1, hint:"사도들의 행적을 다룹니다." },
+      { mode:"new", type:"주제", question:"사랑장으로 잘 알려진 장은 어느 책에 있을까요?", choices:["고린도전서","갈라디아서","에베소서","빌립보서"], answer:0, hint:"13장이 유명합니다." },
+      { mode:"new", type:"인물", question:"다메섹 길에서 큰 변화를 겪은 인물은 누구일까요?", choices:["바울","디모데","바나바","실라"], answer:0, hint:"처음에는 교회를 핍박했습니다." },
+      { mode:"new", type:"사건", question:"오순절 성령 강림과 가장 직접 관련된 사건은 무엇일까요?", choices:["바다를 건넘","방언과 담대한 전파","성전 재건","감옥 탈출"], answer:1, hint:"초대교회 시작의 상징 같은 장면입니다." },
+      { mode:"new", type:"책", question:"예수님의 탄생 이야기와 비유가 많이 담긴 복음서는 무엇일까요?", choices:["마태복음","마가복음","누가복음","요한복음"], answer:2, hint:"의사로 알려진 저자와 연결됩니다." },
+      { mode:"theme", type:"주제", question:"믿음, 소망, 사랑 중 가장 크다고 강조되는 것은 무엇일까요?", choices:["믿음","소망","사랑","지혜"], answer:2, hint:"많은 사람이 암송하는 주제입니다." },
+      { mode:"theme", type:"주제", question:"기도할 때 가장 먼저 떠오르는 모범기도는 무엇일까요?", choices:["축복기도","주기도문","감사기도","회개기도"], answer:1, hint:"하늘에 계신 아버지로 시작합니다." },
+      { mode:"theme", type:"상징", question:"빛과 소금은 주로 누구를 가리키는 표현일까요?", choices:["왕들","제사장","제자들","천사들"], answer:2, hint:"세상 속에서 역할을 말합니다." },
+      { mode:"theme", type:"주제", question:"잃은 양 비유가 전하는 핵심은 무엇일까요?", choices:["부의 축적","잃은 자를 찾는 기쁨","전쟁 준비","지식 경쟁"], answer:1, hint:"찾아낸 후 기뻐하는 장면이 있습니다." },
+      { mode:"theme", type:"주제", question:"선한 사마리아인 비유의 핵심은 무엇일까요?", choices:["외모 판단","이웃 사랑의 실천","재산 보호","여행 준비"], answer:1, hint:"도와준 사람이 누구였는지 떠올려 보세요." },
+      { mode:"mixed", type:"말씀 개념", question:"성경에서 자주 강조되는 덕목 조합으로 가장 알맞은 것은 무엇일까요?", choices:["권력, 경쟁, 성공","믿음, 소망, 사랑","속도, 효율, 성과","부, 명예, 인기"], answer:1, hint:"신약에서 많이 알려진 조합입니다." }
     ];
 
     const els = {
@@ -620,11 +483,70 @@
       resultText: document.getElementById('resultText'),
       restartBtn: document.getElementById('restartBtn'),
       closeBtn: document.getElementById('closeBtn'),
-      modeRow: document.getElementById('modeRow')
+      modeRow: document.getElementById('modeRow'),
+      typeRow: document.getElementById('typeRow'),
+      quizTypeLabel: document.getElementById('quizTypeLabel'),
+      quizTypeDesc: document.getElementById('quizTypeDesc')
+    };
+
+    const typeConfigs = {
+      A: {
+        label: 'A타입',
+        desc: '기본 연습형 퀴즈입니다. 시간 제한 없이 차분하게 문제를 풀 수 있어요.',
+        totalTime: 0,
+        showTimeInfinity: true,
+        useCombo: false,
+        autoHint: false,
+        correctBase: 10,
+        combo3: 10,
+        combo5: 10,
+        wrongPenalty: 0,
+        rankMode: 'practice'
+      },
+      B: {
+        label: 'B타입',
+        desc: '점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 60초 동안 랜덤 문제를 풀 수 있어요.',
+        totalTime: 60,
+        showTimeInfinity: false,
+        useCombo: true,
+        autoHint: false,
+        correctBase: 10,
+        combo3: 15,
+        combo5: 20,
+        wrongPenalty: 5,
+        rankMode: 'arcade'
+      },
+      C: {
+        label: 'C타입',
+        desc: '학습형 퀴즈입니다. 힌트가 자동으로 표시되고 75초 동안 부담 없이 풀 수 있어요.',
+        totalTime: 75,
+        showTimeInfinity: false,
+        useCombo: false,
+        autoHint: true,
+        correctBase: 8,
+        combo3: 8,
+        combo5: 8,
+        wrongPenalty: 2,
+        rankMode: 'learning'
+      },
+      D: {
+        label: 'D타입',
+        desc: '도전형 퀴즈입니다. 45초 안에 빠르게 풀어야 하며 점수 변동이 더 큽니다.',
+        totalTime: 45,
+        showTimeInfinity: false,
+        useCombo: true,
+        autoHint: false,
+        correctBase: 12,
+        combo3: 18,
+        combo5: 25,
+        wrongPenalty: 7,
+        rankMode: 'challenge'
+      }
     };
 
     const state = {
       selectedMode: 'mixed',
+      quizType: 'B',
       timer: null,
       totalTime: 60,
       timeLeft: 60,
@@ -636,6 +558,10 @@
       playing: false,
       usedIndexes: []
     };
+
+    function getConfig(){
+      return typeConfigs[state.quizType];
+    }
 
     function shuffle(arr){
       const copy = [...arr];
@@ -651,42 +577,81 @@
       return quizBank.filter(q => q.mode === state.selectedMode || q.mode === 'mixed');
     }
 
+    function labelMode(mode){
+      return ({ mixed:'전체', old:'구약', new:'신약', theme:'주제' })[mode] || '전체';
+    }
+
+    function updateQuizTypeUI(){
+      const cfg = getConfig();
+      els.quizTypeLabel.textContent = cfg.label;
+      els.quizTypeDesc.textContent = cfg.desc;
+      els.time.textContent = cfg.showTimeInfinity && !state.playing ? '∞' : state.timeLeft;
+      els.hintBtn.style.display = state.quizType === 'C' ? 'none' : 'inline-block';
+    }
+
     function resetUIForIdle(){
+      const cfg = getConfig();
+      clearInterval(state.timer);
+      state.playing = false;
+      state.current = null;
+      state.timeLeft = cfg.totalTime;
       els.qMeta.textContent = '준비 완료';
       els.question.textContent = '시작 버튼을 누르면 문제가 나옵니다.';
       els.choices.innerHTML = ['A. 보기 1','B. 보기 2','C. 보기 3','D. 보기 4']
         .map(t => `<button class="choice" disabled>${t}</button>`).join('');
       els.message.textContent = '';
       els.message.className = 'message';
-      els.progressText.textContent = '대기 중';
+      els.progressText.textContent = cfg.totalTime === 0 ? '연습 모드' : '대기 중';
       els.progressBar.style.width = '100%';
+      updateStats();
+      updateQuizTypeUI();
     }
 
     function updateStats(){
+      const cfg = getConfig();
       els.score.textContent = state.score;
-      els.time.textContent = state.timeLeft;
-      els.combo.textContent = state.combo;
+      els.combo.textContent = cfg.useCombo ? state.combo : '-';
+      els.time.textContent = cfg.showTimeInfinity && !state.playing ? '∞' : (cfg.totalTime === 0 ? '∞' : state.timeLeft);
+
       const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
       els.accuracy.textContent = `${accuracy}%`;
-      els.progressText.textContent = state.playing ? `${state.totalTime - state.timeLeft}초 진행` : '대기 중';
-      els.progressBar.style.width = `${(state.timeLeft / state.totalTime) * 100}%`;
+
+      if(!state.playing){
+        els.progressText.textContent = cfg.totalTime === 0 ? '연습 모드' : '대기 중';
+        els.progressBar.style.width = '100%';
+        return;
+      }
+
+      if(cfg.totalTime === 0){
+        els.progressText.textContent = `${state.answered}문제 풀이`;
+        els.progressBar.style.width = '100%';
+      } else {
+        els.progressText.textContent = `${cfg.totalTime - state.timeLeft}초 진행`;
+        els.progressBar.style.width = `${(state.timeLeft / cfg.totalTime) * 100}%`;
+      }
     }
 
     function buildQuestion(){
       const pool = getPool();
       if(pool.length === 0) return null;
 
-      let candidates = pool.map((q, idx) => ({q, idx})).filter(item => !state.usedIndexes.includes(item.idx + '_' + state.selectedMode));
+      let candidates = pool
+        .map((q, idx) => ({ q, idx }))
+        .filter(item => !state.usedIndexes.includes(item.idx + '_' + state.selectedMode + '_' + state.quizType));
+
       if(candidates.length === 0){
         state.usedIndexes = [];
-        candidates = pool.map((q, idx) => ({q, idx}));
+        candidates = pool.map((q, idx) => ({ q, idx }));
       }
+
       const picked = candidates[Math.floor(Math.random() * candidates.length)];
-      state.usedIndexes.push(picked.idx + '_' + state.selectedMode);
+      state.usedIndexes.push(picked.idx + '_' + state.selectedMode + '_' + state.quizType);
 
       const original = picked.q;
       const answerText = original.choices[original.answer];
-      const shuffledChoices = shuffle(original.choices.map((text, i) => ({text, correct: i === original.answer})));
+      const shuffledChoices = shuffle(
+        original.choices.map((text, i) => ({ text, correct: i === original.answer }))
+      );
       const newAnswerIndex = shuffledChoices.findIndex(c => c.correct);
 
       return {
@@ -704,7 +669,7 @@
       state.current = buildQuestion();
       if(!state.current) return;
 
-      els.qMeta.textContent = `${labelMode(state.selectedMode)} · ${state.current.type}`;
+      els.qMeta.textContent = `${getConfig().label} · ${labelMode(state.selectedMode)} · ${state.current.type}`;
       els.question.textContent = state.current.question;
       els.message.textContent = '';
       els.message.className = 'message';
@@ -717,39 +682,60 @@
       [...els.choices.querySelectorAll('.choice')].forEach(btn => {
         btn.addEventListener('click', () => answerQuestion(Number(btn.dataset.index)));
       });
+
+      if(getConfig().autoHint){
+        els.message.textContent = `힌트: ${state.current.hint}`;
+        els.message.className = 'message warn';
+      }
     }
 
-    function labelMode(mode){
-      return ({ mixed:'전체', old:'구약', new:'신약', theme:'주제' })[mode] || '전체';
+    function getCorrectScore(){
+      const cfg = getConfig();
+      if(!cfg.useCombo) return cfg.correctBase;
+      if(state.combo >= 5) return cfg.combo5;
+      if(state.combo >= 3) return cfg.combo3;
+      return cfg.correctBase;
     }
 
     function answerQuestion(index){
       if(!state.playing || !state.current) return;
 
+      const cfg = getConfig();
       const buttons = [...els.choices.querySelectorAll('.choice')];
       buttons.forEach(b => b.disabled = true);
       state.answered += 1;
 
       if(index === state.current.answer){
         state.correct += 1;
-        state.combo += 1;
-        const gained = state.combo >= 5 ? 20 : state.combo >= 3 ? 15 : 10;
+        if(cfg.useCombo){
+          state.combo += 1;
+        } else {
+          state.combo = 0;
+        }
+
+        const gained = getCorrectScore();
         state.score += gained;
         buttons[index].classList.add('correct');
-        els.message.textContent = `정답! +${gained}점${state.combo >= 3 ? ` · ${state.combo}콤보` : ''}`;
+
+        if(cfg.useCombo && state.combo >= 3){
+          els.message.textContent = `정답! +${gained}점 · ${state.combo}콤보`;
+        } else {
+          els.message.textContent = `정답! +${gained}점`;
+        }
         els.message.className = 'message ok';
       } else {
         state.combo = 0;
-        state.score = Math.max(0, state.score - 5);
+        state.score = Math.max(0, state.score - cfg.wrongPenalty);
         buttons[index].classList.add('wrong');
         buttons[state.current.answer].classList.add('correct');
-        els.message.textContent = `오답! 정답은 “${state.current.answerText}” 입니다. -5점`;
+        els.message.textContent = `오답! 정답은 “${state.current.answerText}” 입니다.${cfg.wrongPenalty > 0 ? ` -${cfg.wrongPenalty}점` : ''}`;
         els.message.className = 'message bad';
       }
 
       updateStats();
+
       setTimeout(() => {
-        if(state.playing && state.timeLeft > 0){
+        if(state.playing){
           renderQuestion();
         }
       }, 800);
@@ -762,28 +748,61 @@
     }
 
     function startGame(){
+      const cfg = getConfig();
       clearInterval(state.timer);
+
       state.playing = true;
-      state.timeLeft = state.totalTime;
+      state.totalTime = cfg.totalTime;
+      state.timeLeft = cfg.totalTime;
       state.score = 0;
       state.combo = 0;
       state.answered = 0;
       state.correct = 0;
       state.usedIndexes = [];
       els.overlay.classList.remove('show');
+
       updateStats();
+      updateQuizTypeUI();
       renderQuestion();
 
-      state.timer = setInterval(() => {
-        state.timeLeft -= 1;
-        updateStats();
-        if(state.timeLeft <= 0){
-          endGame();
-        }
-      }, 1000);
+      if(cfg.totalTime > 0){
+        state.timer = setInterval(() => {
+          state.timeLeft -= 1;
+          updateStats();
+          if(state.timeLeft <= 0){
+            endGame();
+          }
+        }, 1000);
+      }
     }
 
     function getRank(score, accuracy){
+      const mode = getConfig().rankMode;
+
+      if(mode === 'practice'){
+        if(accuracy >= 95 && score >= 100) return 'S';
+        if(accuracy >= 85 && score >= 70) return 'A';
+        if(accuracy >= 70 && score >= 40) return 'B';
+        if(accuracy >= 50) return 'C';
+        return 'D';
+      }
+
+      if(mode === 'learning'){
+        if(accuracy >= 90 && score >= 80) return 'S';
+        if(accuracy >= 80 && score >= 60) return 'A';
+        if(accuracy >= 65 && score >= 40) return 'B';
+        if(accuracy >= 45) return 'C';
+        return 'D';
+      }
+
+      if(mode === 'challenge'){
+        if(score >= 160 && accuracy >= 85) return 'S';
+        if(score >= 120 && accuracy >= 75) return 'A';
+        if(score >= 80 && accuracy >= 60) return 'B';
+        if(score >= 40 && accuracy >= 45) return 'C';
+        return 'D';
+      }
+
       if(score >= 180 && accuracy >= 85) return 'S';
       if(score >= 130 && accuracy >= 75) return 'A';
       if(score >= 90 && accuracy >= 60) return 'B';
@@ -815,13 +834,29 @@
     els.modeRow.addEventListener('click', (e) => {
       const btn = e.target.closest('.pill');
       if(!btn) return;
+
       [...els.modeRow.querySelectorAll('.pill')].forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.selectedMode = btn.dataset.mode;
+
       if(!state.playing) resetUIForIdle();
     });
 
-    updateStats();
+    els.typeRow.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill');
+      if(!btn) return;
+
+      [...els.typeRow.querySelectorAll('.pill')].forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.quizType = btn.dataset.type;
+
+      if(!state.playing) {
+        resetUIForIdle();
+      } else {
+        updateQuizTypeUI();
+      }
+    });
+
     resetUIForIdle();
   </script>
 </body>
