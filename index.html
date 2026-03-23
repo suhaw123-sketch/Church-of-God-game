@@ -1,862 +1,1077 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>성경 말씀 퀴즈 게임</title>
-  <style>
-    :root{
-      --bg1:#0f172a;
-      --bg2:#1e293b;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#64748b;
-      --line:#e2e8f0;
-      --accent:#2563eb;
-      --accent2:#7c3aed;
-      --ok:#16a34a;
-      --bad:#dc2626;
-      --warn:#f59e0b;
-      --shadow:0 16px 40px rgba(2,6,23,.18);
-      --radius:24px;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#0f172a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>성경 말씀 퀴즈 게임</title>
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family:"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-      color:#fff;
-      background:
-        radial-gradient(circle at top left, rgba(124,58,237,.35), transparent 30%),
-        radial-gradient(circle at top right, rgba(37,99,235,.30), transparent 28%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-    }
+<style>
+:root{
+  --app-height:100dvh;
+  --bg1:#0f172a;
+  --bg2:#1e293b;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --accent:#2563eb;
+  --accent2:#7c3aed;
+  --ok:#16a34a;
+  --bad:#dc2626;
+  --warn:#f59e0b;
+  --shadow:0 16px 40px rgba(2,6,23,.18);
+  --radius:24px;
+}
 
-    .app{
-      width:min(980px, 100%);
-      display:grid;
-      gap:16px;
-    }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+  touch-action:manipulation;
+}
+body{
+  min-height:var(--app-height);
+  font-family:"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color:#fff;
+  background:
+    radial-gradient(circle at top left, rgba(124,58,237,.35), transparent 30%),
+    radial-gradient(circle at top right, rgba(37,99,235,.30), transparent 28%),
+    linear-gradient(135deg, var(--bg1), var(--bg2));
+}
 
-    .topbar{
-      display:grid;
-      grid-template-columns:repeat(4, 1fr);
-      gap:12px;
-    }
+.app{
+  width:100%;
+  max-width:none;
+  height:var(--app-height);
+  display:grid;
+  grid-template-rows:auto 1fr;
+  gap:0;
+}
 
-    .stat{
-      background:rgba(255,255,255,.10);
-      backdrop-filter:blur(8px);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:20px;
-      padding:14px 16px;
-      box-shadow:var(--shadow);
-    }
+.topbar{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:8px;
+  padding:10px 10px 8px;
+  background:rgba(15,23,42,.92);
+  position:sticky;
+  top:0;
+  z-index:30;
+  backdrop-filter:blur(10px);
+}
 
-    .stat .label{
-      font-size:12px;
-      opacity:.8;
-      margin-bottom:6px;
-    }
+.stat{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  padding:10px 8px;
+  min-width:0;
+}
 
-    .stat .value{
-      font-size:28px;
-      font-weight:800;
-      letter-spacing:-.02em;
-    }
+.stat .label{
+  font-size:11px;
+  opacity:.82;
+  margin-bottom:4px;
+  white-space:nowrap;
+}
 
-    .card{
-      background:var(--card);
-      color:var(--text);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
+.stat .value{
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
 
-    .hero{
-      padding:22px 24px;
-      background:linear-gradient(135deg, #eff6ff, #f5f3ff 55%, #ffffff);
-      border-bottom:1px solid var(--line);
-    }
+.card{
+  height:100%;
+  border-radius:0;
+  box-shadow:none;
+  display:grid;
+  grid-template-rows:auto 1fr;
+  overflow:hidden;
+  background:#fff;
+  color:var(--text);
+}
 
-    .hero h1{
-      margin:0 0 8px;
-      font-size:clamp(24px, 4vw, 38px);
-      line-height:1.1;
-      letter-spacing:-.03em;
-    }
+.hero{
+  padding:16px 16px 12px;
+  background:linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+}
 
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      font-size:15px;
-    }
+.hero h1{
+  margin:0 0 6px;
+  font-size:24px;
+  line-height:1.15;
+  letter-spacing:-.03em;
+}
 
-    .content{
-      padding:22px;
-      display:grid;
-      gap:16px;
-    }
+.hero p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
 
-    .type-row,
-    .mode-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+.content{
+  padding:12px 12px calc(96px + env(safe-area-inset-bottom));
+  display:grid;
+  grid-template-rows:auto auto auto auto 1fr auto;
+  gap:12px;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  background:#f8fafc;
+}
 
-    .pill{
-      border:1px solid var(--line);
-      background:#fff;
-      color:var(--text);
-      border-radius:999px;
-      padding:10px 14px;
-      font-weight:700;
-      cursor:pointer;
-      transition:.18s ease;
-    }
+.type-row,
+.mode-row{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:8px;
+}
 
-    .pill.active{
-      background:linear-gradient(135deg, var(--accent), var(--accent2));
-      color:#fff;
-      border-color:transparent;
-    }
+.pill{
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--text);
+  border-radius:14px;
+  padding:12px 8px;
+  font-size:13px;
+  text-align:center;
+  min-height:44px;
+  font-weight:800;
+  cursor:pointer;
+}
+.pill.active{
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  color:#fff;
+  border-color:transparent;
+}
 
-    .question-box{
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:20px;
-      background:#fff;
-    }
+.progress-wrap{ display:grid; gap:6px; }
+.progress-label{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:700;
+}
+.progress{
+  height:10px;
+  background:#e2e8f0;
+  border-radius:999px;
+  overflow:hidden;
+}
+.progress > div{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg, var(--accent), var(--accent2));
+  transition:width .25s linear;
+}
 
-    .mini{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:8px;
-      font-weight:700;
-    }
+.question-box{
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:18px 16px;
+  background:#fff;
+}
+.mini{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:8px;
+  font-weight:700;
+}
+.question{
+  font-size:24px;
+  line-height:1.4;
+  font-weight:800;
+  letter-spacing:-.02em;
+  margin:0;
+}
 
-    .question{
-      font-size:clamp(20px, 3vw, 30px);
-      line-height:1.35;
-      font-weight:800;
-      letter-spacing:-.02em;
-      margin:0;
-    }
+.choices{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+.choice{
+  border:1px solid var(--line);
+  border-radius:18px;
+  min-height:64px;
+  padding:18px 16px;
+  text-align:left;
+  background:#fff;
+  font-size:17px;
+  line-height:1.35;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(15,23,42,.04);
+  transition:transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.choice:active{ transform:scale(.98); }
+.choice:disabled{ cursor:default; }
+.choice.correct{ background:#f0fdf4; border-color:#86efac; color:#166534; }
+.choice.wrong{ background:#fef2f2; border-color:#fca5a5; color:#991b1b; }
 
-    .choices{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
+.bottom{
+  position:sticky;
+  bottom:0;
+  z-index:25;
+  margin-top:4px;
+  padding:10px 0 calc(env(safe-area-inset-bottom) + 2px);
+  background:linear-gradient(180deg, rgba(248,250,252,0) 0%, rgba(248,250,252,.92) 18%, rgba(248,250,252,1) 100%);
+  display:grid;
+  gap:10px;
+}
+.message{
+  min-height:22px;
+  font-weight:800;
+  font-size:14px;
+  padding:0 4px;
+}
+.message.ok{ color:var(--ok); }
+.message.bad{ color:var(--bad); }
+.message.warn{ color:var(--warn); }
 
-    .choice{
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      text-align:left;
-      background:#fff;
-      font-size:16px;
-      font-weight:700;
-      cursor:pointer;
-      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
-    }
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  width:100%;
+}
+button.primary, button.secondary{
+  border:none;
+  width:100%;
+  min-height:56px;
+  font-size:16px;
+  border-radius:18px;
+  font-weight:800;
+  cursor:pointer;
+}
+button.primary{
+  color:#fff;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+}
+button.secondary{
+  background:#eef2ff;
+  color:#3730a3;
+}
 
-    .choice:hover:not(:disabled){
-      transform:translateY(-2px);
-      border-color:#cbd5e1;
-      box-shadow:0 12px 24px rgba(15,23,42,.08);
-    }
+.overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  background:rgba(2,6,23,.55);
+  backdrop-filter:blur(8px);
+  z-index:100;
+}
+.overlay.show{ display:flex; }
 
-    .choice:disabled{ cursor:default; }
-    .choice.correct{ background:#f0fdf4; border-color:#86efac; color:#166534; }
-    .choice.wrong{ background:#fef2f2; border-color:#fca5a5; color:#991b1b; }
+.result{
+  width:100%;
+  height:var(--app-height);
+  background:#fff;
+  color:var(--text);
+  padding:24px 18px calc(28px + env(safe-area-inset-bottom));
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+}
+.rank{
+  font-size:64px;
+  font-weight:900;
+  letter-spacing:-.05em;
+  margin:0 0 8px;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.result h2{
+  margin:0 0 10px;
+  font-size:30px;
+}
+.result p{
+  margin:6px 0;
+  color:var(--muted);
+  font-size:15px;
+}
+.result-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:20px 0;
+}
+.result-item{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  background:#fafafa;
+}
+.result-item .k{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.result-item .v{
+  font-size:24px;
+  font-weight:900;
+}
+.footnote{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.5;
+  margin-top:10px;
+}
 
-    .bottom{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
+/* 시작화면 */
+.start-screen{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(124,58,237,.42), transparent 25%),
+    radial-gradient(circle at 80% 20%, rgba(37,99,235,.36), transparent 25%),
+    linear-gradient(160deg, #0b1020, #111827 55%, #1e293b);
+}
+.start-screen.hide{ display:none; }
 
-    .message{
-      min-height:24px;
-      font-weight:800;
-      font-size:15px;
-    }
+.start-card{
+  width:100%;
+  max-width:560px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(14px);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  padding:24px 18px 20px;
+}
 
-    .message.ok{ color:var(--ok); }
-    .message.bad{ color:var(--bad); }
-    .message.warn{ color:var(--warn); }
+.start-badge{
+  display:inline-block;
+  font-size:12px;
+  font-weight:800;
+  color:#c7d2fe;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;
+  padding:7px 12px;
+  margin-bottom:14px;
+}
+.start-title{
+  font-size:34px;
+  line-height:1.12;
+  font-weight:900;
+  margin:0 0 10px;
+  letter-spacing:-.04em;
+}
+.start-sub{
+  color:#dbeafe;
+  font-size:14px;
+  line-height:1.55;
+  margin:0 0 18px;
+}
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+.home-section{
+  margin-top:16px;
+}
+.home-label{
+  font-size:13px;
+  font-weight:800;
+  color:#cbd5e1;
+  margin-bottom:8px;
+}
+.home-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:10px;
+}
+.home-card{
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border-radius:18px;
+  padding:14px 12px;
+  text-align:left;
+  cursor:pointer;
+}
+.home-card.active{
+  background:linear-gradient(135deg, rgba(37,99,235,.95), rgba(124,58,237,.95));
+  border-color:transparent;
+}
+.home-card .t1{
+  font-size:16px;
+  font-weight:900;
+  margin-bottom:4px;
+}
+.home-card .t2{
+  font-size:12px;
+  line-height:1.45;
+  color:#dbeafe;
+}
 
-    button.primary, button.secondary{
-      border:none;
-      border-radius:16px;
-      padding:13px 18px;
-      font-size:15px;
-      font-weight:800;
-      cursor:pointer;
-      transition:.18s ease;
-    }
-
-    button.primary{
-      color:#fff;
-      background:linear-gradient(135deg, var(--accent), var(--accent2));
-    }
-
-    button.secondary{
-      background:#eef2ff;
-      color:#3730a3;
-    }
-
-    button.primary:hover, button.secondary:hover{ transform:translateY(-1px); }
-
-    .progress-wrap{
-      display:grid;
-      gap:8px;
-    }
-
-    .progress-label{
-      display:flex;
-      justify-content:space-between;
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-    }
-
-    .progress{
-      height:12px;
-      background:#e2e8f0;
-      border-radius:999px;
-      overflow:hidden;
-    }
-
-    .progress > div{
-      height:100%;
-      width:100%;
-      background:linear-gradient(90deg, var(--accent), var(--accent2));
-      transition:width .25s linear;
-    }
-
-    .overlay{
-      position:fixed;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      background:rgba(2,6,23,.55);
-      backdrop-filter:blur(8px);
-    }
-
-    .overlay.show{ display:flex; }
-
-    .result{
-      width:min(540px, 100%);
-      background:#fff;
-      color:var(--text);
-      border-radius:28px;
-      box-shadow:var(--shadow);
-      padding:26px;
-      text-align:center;
-    }
-
-    .rank{
-      font-size:54px;
-      font-weight:900;
-      letter-spacing:-.05em;
-      margin:0 0 8px;
-      background:linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;
-    }
-
-    .result h2{
-      margin:0 0 10px;
-      font-size:28px;
-    }
-
-    .result p{
-      margin:6px 0;
-      color:var(--muted);
-      font-size:15px;
-    }
-
-    .result-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin:20px 0;
-    }
-
-    .result-item{
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      background:#fafafa;
-    }
-
-    .result-item .k{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:700;
-      margin-bottom:6px;
-    }
-
-    .result-item .v{
-      font-size:28px;
-      font-weight:900;
-    }
-
-    .footnote{
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.5;
-      margin-top:10px;
-    }
-
-    @media (max-width:760px){
-      .topbar{ grid-template-columns:1fr 1fr; }
-      .choices{ grid-template-columns:1fr; }
-      .content{ padding:16px; }
-      .hero{ padding:18px; }
-      .result-grid{ grid-template-columns:1fr 1fr; }
-    }
-  </style>
+.start-main-btn{
+  margin-top:18px;
+  width:100%;
+  min-height:58px;
+  border:none;
+  border-radius:20px;
+  background:linear-gradient(135deg, #2563eb, #7c3aed);
+  color:#fff;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+}
+.start-tip{
+  margin-top:12px;
+  font-size:12px;
+  color:#cbd5e1;
+  text-align:center;
+}
+</style>
 </head>
 <body>
-  <div class="app">
-    <div class="topbar">
-      <div class="stat">
-        <div class="label">점수</div>
-        <div class="value" id="score">0</div>
-      </div>
-      <div class="stat">
-        <div class="label">남은 시간</div>
-        <div class="value" id="time">∞</div>
-      </div>
-      <div class="stat">
-        <div class="label">콤보</div>
-        <div class="value" id="combo">0</div>
-      </div>
-      <div class="stat">
-        <div class="label">정답률</div>
-        <div class="value" id="accuracy">0%</div>
+
+<!-- 시작화면 -->
+<div class="start-screen" id="startScreen">
+  <div class="start-card">
+    <div class="start-badge">모바일 풀스크린 퀴즈</div>
+    <h1 class="start-title">성경 말씀<br>퀴즈 게임</h1>
+    <p class="start-sub">
+      원하는 타입과 범위를 고른 뒤 시작해 보세요.<br>
+      모바일에서 더 몰입감 있게 즐길 수 있도록 게임 화면처럼 구성했어요.
+    </p>
+
+    <div class="home-section">
+      <div class="home-label">퀴즈 타입 선택</div>
+      <div class="home-grid" id="homeTypeGrid">
+        <div class="home-card" data-type="A">
+          <div class="t1">A타입</div>
+          <div class="t2">기본 연습형<br>시간 제한 없음</div>
+        </div>
+        <div class="home-card active" data-type="B">
+          <div class="t1">B타입</div>
+          <div class="t2">게임형<br>60초 + 콤보</div>
+        </div>
+        <div class="home-card" data-type="C">
+          <div class="t1">C타입</div>
+          <div class="t2">학습형<br>힌트 자동 표시</div>
+        </div>
+        <div class="home-card" data-type="D">
+          <div class="t1">D타입</div>
+          <div class="t2">도전형<br>45초 빠른 진행</div>
+        </div>
       </div>
     </div>
 
-    <section class="card">
-      <div class="hero">
-        <h1>성경 말씀 퀴즈 게임 <span id="quizTypeLabel" style="color:#4f46e5">B타입</span></h1>
-        <p id="quizTypeDesc">점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 시작 버튼을 누르면 60초 동안 랜덤 문제를 풀 수 있어요.</p>
-      </div>
-
-      <div class="content">
-        <div class="type-row" id="typeRow">
-          <button class="pill" data-type="A">A타입</button>
-          <button class="pill active" data-type="B">B타입</button>
-          <button class="pill" data-type="C">C타입</button>
-          <button class="pill" data-type="D">D타입</button>
+    <div class="home-section">
+      <div class="home-label">문제 범위 선택</div>
+      <div class="home-grid" id="homeModeGrid">
+        <div class="home-card active" data-mode="mixed">
+          <div class="t1">전체</div>
+          <div class="t2">전 범위 랜덤</div>
         </div>
-
-        <div class="mode-row" id="modeRow">
-          <button class="pill active" data-mode="mixed">전체</button>
-          <button class="pill" data-mode="old">구약</button>
-          <button class="pill" data-mode="new">신약</button>
-          <button class="pill" data-mode="theme">주제</button>
+        <div class="home-card" data-mode="old">
+          <div class="t1">구약</div>
+          <div class="t2">구약 문제 중심</div>
         </div>
-
-        <div class="progress-wrap">
-          <div class="progress-label">
-            <span>게임 진행</span>
-            <span id="progressText">대기 중</span>
-          </div>
-          <div class="progress"><div id="progressBar"></div></div>
+        <div class="home-card" data-mode="new">
+          <div class="t1">신약</div>
+          <div class="t2">신약 문제 중심</div>
         </div>
-
-        <div class="question-box">
-          <div class="mini" id="qMeta">준비 완료</div>
-          <p class="question" id="question">시작 버튼을 누르면 문제가 나옵니다.</p>
-        </div>
-
-        <div class="choices" id="choices">
-          <button class="choice" disabled>A. 보기 1</button>
-          <button class="choice" disabled>B. 보기 2</button>
-          <button class="choice" disabled>C. 보기 3</button>
-          <button class="choice" disabled>D. 보기 4</button>
-        </div>
-
-        <div class="bottom">
-          <div class="message" id="message"></div>
-          <div class="actions">
-            <button class="secondary" id="hintBtn">힌트</button>
-            <button class="primary" id="startBtn">게임 시작</button>
-          </div>
+        <div class="home-card" data-mode="theme">
+          <div class="t1">주제</div>
+          <div class="t2">주제별 말씀 퀴즈</div>
         </div>
       </div>
-    </section>
+    </div>
+
+    <button class="start-main-btn" id="homeStartBtn">▶ 게임 시작</button>
+    <div class="start-tip">시작 후에도 화면 안에서 타입과 범위를 다시 바꿀 수 있어요.</div>
   </div>
+</div>
 
-  <div class="overlay" id="overlay">
-    <div class="result">
-      <div class="rank" id="rank">A</div>
-      <h2>게임 종료</h2>
-      <p id="resultText">수고하셨습니다.</p>
-
-      <div class="result-grid">
-        <div class="result-item">
-          <div class="k">최종 점수</div>
-          <div class="v" id="finalScore">0</div>
-        </div>
-        <div class="result-item">
-          <div class="k">정답률</div>
-          <div class="v" id="finalAccuracy">0%</div>
-        </div>
-      </div>
-
-      <div class="actions" style="justify-content:center; margin-top:8px;">
-        <button class="secondary" id="closeBtn">닫기</button>
-        <button class="primary" id="restartBtn">다시하기</button>
-      </div>
-
-      <div class="footnote">
-        A/B/C/D 타입 선택이 실제로 적용됩니다. 필요하면 다음 단계에서 타입별 문제를 아예 따로 분리해 더 전문적으로 확장할 수 있습니다.
-      </div>
+<div class="app">
+  <div class="topbar">
+    <div class="stat">
+      <div class="label">점수</div>
+      <div class="value" id="score">0</div>
+    </div>
+    <div class="stat">
+      <div class="label">남은 시간</div>
+      <div class="value" id="time">60</div>
+    </div>
+    <div class="stat">
+      <div class="label">콤보</div>
+      <div class="value" id="combo">0</div>
+    </div>
+    <div class="stat">
+      <div class="label">정답률</div>
+      <div class="value" id="accuracy">0%</div>
     </div>
   </div>
 
-  <script>
-    const quizBank = [
-      { mode:"old", type:"인물", question:"노아가 만든 것은 무엇일까요?", choices:["방주","성막","돌판","우물"], answer:0, hint:"홍수와 관련된 이야기입니다." },
-      { mode:"old", type:"장소", question:"모세가 십계명을 받은 산은 어디일까요?", choices:["감람산","시내산","갈멜산","헤르몬산"], answer:1, hint:"출애굽 후 중요한 장면입니다." },
-      { mode:"old", type:"인물", question:"골리앗과 맞선 인물은 누구일까요?", choices:["사울","솔로몬","다윗","엘리야"], answer:2, hint:"훗날 왕이 됩니다." },
-      { mode:"old", type:"책", question:"시편은 주로 어떤 형식으로 이루어져 있을까요?", choices:["예언","편지","노래와 기도","역사 기록"], answer:2, hint:"찬양과 관련이 깊습니다." },
-      { mode:"old", type:"사건", question:"여리고 성은 어떻게 무너졌을까요?", choices:["지진으로","불로","군사 공격으로","하나님의 명령에 따른 행진 후"], answer:3, hint:"나팔 소리가 등장합니다." },
-      { mode:"old", type:"인물", question:"사자굴에 들어갔지만 보호받은 인물은 누구일까요?", choices:["다니엘","요셉","사무엘","욥"], answer:0, hint:"기도하는 인물로 잘 알려져 있습니다." },
-      { mode:"old", type:"인물", question:"큰 물고기 이야기와 관련된 선지자는 누구일까요?", choices:["요나","이사야","예레미야","호세아"], answer:0, hint:"니느웨와 연결됩니다." },
-      { mode:"old", type:"인물", question:"애굽 총리가 된 인물은 누구일까요?", choices:["아브라함","요셉","이삭","야곱"], answer:1, hint:"채색옷 이야기가 떠오릅니다." },
-      { mode:"new", type:"인물", question:"예수님을 낳은 마리아의 남편 이름은 무엇일까요?", choices:["야고보","요셉","사가랴","안드레"], answer:1, hint:"목수와 관련된 이미지가 있습니다." },
-      { mode:"new", type:"장소", question:"예수님께서 물을 포도주로 바꾸신 곳은 어디일까요?", choices:["가버나움","예루살렘","가나","벳새다"], answer:2, hint:"혼인잔치가 열렸던 곳입니다." },
-      { mode:"new", type:"인물", question:"예수님의 제자 중 세 번 부인한 인물은 누구일까요?", choices:["베드로","요한","빌립","도마"], answer:0, hint:"닭 울음과 연결됩니다." },
-      { mode:"new", type:"책", question:"초대교회 활동과 전도가 많이 기록된 책은 무엇일까요?", choices:["로마서","사도행전","히브리서","야고보서"], answer:1, hint:"사도들의 행적을 다룹니다." },
-      { mode:"new", type:"주제", question:"사랑장으로 잘 알려진 장은 어느 책에 있을까요?", choices:["고린도전서","갈라디아서","에베소서","빌립보서"], answer:0, hint:"13장이 유명합니다." },
-      { mode:"new", type:"인물", question:"다메섹 길에서 큰 변화를 겪은 인물은 누구일까요?", choices:["바울","디모데","바나바","실라"], answer:0, hint:"처음에는 교회를 핍박했습니다." },
-      { mode:"new", type:"사건", question:"오순절 성령 강림과 가장 직접 관련된 사건은 무엇일까요?", choices:["바다를 건넘","방언과 담대한 전파","성전 재건","감옥 탈출"], answer:1, hint:"초대교회 시작의 상징 같은 장면입니다." },
-      { mode:"new", type:"책", question:"예수님의 탄생 이야기와 비유가 많이 담긴 복음서는 무엇일까요?", choices:["마태복음","마가복음","누가복음","요한복음"], answer:2, hint:"의사로 알려진 저자와 연결됩니다." },
-      { mode:"theme", type:"주제", question:"믿음, 소망, 사랑 중 가장 크다고 강조되는 것은 무엇일까요?", choices:["믿음","소망","사랑","지혜"], answer:2, hint:"많은 사람이 암송하는 주제입니다." },
-      { mode:"theme", type:"상징", question:"빛과 소금은 주로 누구를 가리키는 표현일까요?", choices:["왕들","제사장","제자들","천사들"], answer:2, hint:"세상 속에서 역할을 말합니다." },
-      { mode:"theme", type:"주제", question:"잃은 양 비유가 전하는 핵심은 무엇일까요?", choices:["부의 축적","잃은 자를 찾는 기쁨","전쟁 준비","지식 경쟁"], answer:1, hint:"찾아낸 후 기뻐하는 장면이 있습니다." },
-      { mode:"theme", type:"주제", question:"선한 사마리아인 비유의 핵심은 무엇일까요?", choices:["외모 판단","이웃 사랑의 실천","재산 보호","여행 준비"], answer:1, hint:"도와준 사람이 누구였는지 떠올려 보세요." },
-      { mode:"mixed", type:"말씀 개념", question:"성경에서 자주 강조되는 덕목 조합으로 가장 알맞은 것은 무엇일까요?", choices:["권력, 경쟁, 성공","믿음, 소망, 사랑","속도, 효율, 성과","부, 명예, 인기"], answer:1, hint:"신약에서 많이 알려진 조합입니다." }
-    ];
+  <section class="card">
+    <div class="hero">
+      <h1>성경 말씀 퀴즈 게임 <span id="quizTypeLabel" style="color:#4f46e5">B타입</span></h1>
+      <p id="quizTypeDesc">점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 60초 동안 랜덤 문제를 풀 수 있어요.</p>
+    </div>
 
-    const els = {
-      score: document.getElementById('score'),
-      time: document.getElementById('time'),
-      combo: document.getElementById('combo'),
-      accuracy: document.getElementById('accuracy'),
-      qMeta: document.getElementById('qMeta'),
-      question: document.getElementById('question'),
-      choices: document.getElementById('choices'),
-      message: document.getElementById('message'),
-      hintBtn: document.getElementById('hintBtn'),
-      startBtn: document.getElementById('startBtn'),
-      progressText: document.getElementById('progressText'),
-      progressBar: document.getElementById('progressBar'),
-      overlay: document.getElementById('overlay'),
-      finalScore: document.getElementById('finalScore'),
-      finalAccuracy: document.getElementById('finalAccuracy'),
-      rank: document.getElementById('rank'),
-      resultText: document.getElementById('resultText'),
-      restartBtn: document.getElementById('restartBtn'),
-      closeBtn: document.getElementById('closeBtn'),
-      modeRow: document.getElementById('modeRow'),
-      typeRow: document.getElementById('typeRow'),
-      quizTypeLabel: document.getElementById('quizTypeLabel'),
-      quizTypeDesc: document.getElementById('quizTypeDesc')
-    };
+    <div class="content">
+      <div class="type-row" id="typeRow">
+        <button class="pill" data-type="A">A타입</button>
+        <button class="pill active" data-type="B">B타입</button>
+        <button class="pill" data-type="C">C타입</button>
+        <button class="pill" data-type="D">D타입</button>
+      </div>
 
-    const typeConfigs = {
-      A: {
-        label: 'A타입',
-        desc: '기본 연습형 퀴즈입니다. 시간 제한 없이 차분하게 문제를 풀 수 있어요.',
-        totalTime: 0,
-        showTimeInfinity: true,
-        useCombo: false,
-        autoHint: false,
-        correctBase: 10,
-        combo3: 10,
-        combo5: 10,
-        wrongPenalty: 0,
-        rankMode: 'practice'
-      },
-      B: {
-        label: 'B타입',
-        desc: '점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 60초 동안 랜덤 문제를 풀 수 있어요.',
-        totalTime: 60,
-        showTimeInfinity: false,
-        useCombo: true,
-        autoHint: false,
-        correctBase: 10,
-        combo3: 15,
-        combo5: 20,
-        wrongPenalty: 5,
-        rankMode: 'arcade'
-      },
-      C: {
-        label: 'C타입',
-        desc: '학습형 퀴즈입니다. 힌트가 자동으로 표시되고 75초 동안 부담 없이 풀 수 있어요.',
-        totalTime: 75,
-        showTimeInfinity: false,
-        useCombo: false,
-        autoHint: true,
-        correctBase: 8,
-        combo3: 8,
-        combo5: 8,
-        wrongPenalty: 2,
-        rankMode: 'learning'
-      },
-      D: {
-        label: 'D타입',
-        desc: '도전형 퀴즈입니다. 45초 안에 빠르게 풀어야 하며 점수 변동이 더 큽니다.',
-        totalTime: 45,
-        showTimeInfinity: false,
-        useCombo: true,
-        autoHint: false,
-        correctBase: 12,
-        combo3: 18,
-        combo5: 25,
-        wrongPenalty: 7,
-        rankMode: 'challenge'
-      }
-    };
+      <div class="mode-row" id="modeRow">
+        <button class="pill active" data-mode="mixed">전체</button>
+        <button class="pill" data-mode="old">구약</button>
+        <button class="pill" data-mode="new">신약</button>
+        <button class="pill" data-mode="theme">주제</button>
+      </div>
 
-    const state = {
-      selectedMode: 'mixed',
-      quizType: 'B',
-      timer: null,
-      totalTime: 60,
-      timeLeft: 60,
-      score: 0,
-      combo: 0,
-      answered: 0,
-      correct: 0,
-      current: null,
-      playing: false,
-      usedIndexes: []
-    };
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>게임 진행</span>
+          <span id="progressText">대기 중</span>
+        </div>
+        <div class="progress"><div id="progressBar"></div></div>
+      </div>
 
-    function getConfig(){
-      return typeConfigs[state.quizType];
-    }
+      <div class="question-box">
+        <div class="mini" id="qMeta">준비 완료</div>
+        <p class="question" id="question">시작 버튼을 누르면 문제가 나옵니다.</p>
+      </div>
 
-    function shuffle(arr){
-      const copy = [...arr];
-      for(let i = copy.length - 1; i > 0; i--){
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
+      <div class="choices" id="choices">
+        <button class="choice" disabled>A. 보기 1</button>
+        <button class="choice" disabled>B. 보기 2</button>
+        <button class="choice" disabled>C. 보기 3</button>
+        <button class="choice" disabled>D. 보기 4</button>
+      </div>
 
-    function getPool(){
-      if(state.selectedMode === 'mixed') return quizBank;
-      return quizBank.filter(q => q.mode === state.selectedMode || q.mode === 'mixed');
-    }
+      <div class="bottom">
+        <div class="message" id="message"></div>
+        <div class="actions">
+          <button class="secondary" id="hintBtn">힌트</button>
+          <button class="primary" id="startBtn">▶ 시작하기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 
-    function labelMode(mode){
-      return ({ mixed:'전체', old:'구약', new:'신약', theme:'주제' })[mode] || '전체';
-    }
+<div class="overlay" id="overlay">
+  <div class="result">
+    <div class="rank" id="rank">A</div>
+    <h2>게임 종료</h2>
+    <p id="resultText">수고하셨습니다.</p>
 
-    function updateQuizTypeUI(){
-      const cfg = getConfig();
-      els.quizTypeLabel.textContent = cfg.label;
-      els.quizTypeDesc.textContent = cfg.desc;
-      els.time.textContent = cfg.showTimeInfinity && !state.playing ? '∞' : state.timeLeft;
-      els.hintBtn.style.display = state.quizType === 'C' ? 'none' : 'inline-block';
-    }
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="k">최종 점수</div>
+        <div class="v" id="finalScore">0</div>
+      </div>
+      <div class="result-item">
+        <div class="k">정답률</div>
+        <div class="v" id="finalAccuracy">0%</div>
+      </div>
+    </div>
 
-    function resetUIForIdle(){
-      const cfg = getConfig();
-      clearInterval(state.timer);
-      state.playing = false;
-      state.current = null;
-      state.timeLeft = cfg.totalTime;
-      els.qMeta.textContent = '준비 완료';
-      els.question.textContent = '시작 버튼을 누르면 문제가 나옵니다.';
-      els.choices.innerHTML = ['A. 보기 1','B. 보기 2','C. 보기 3','D. 보기 4']
-        .map(t => `<button class="choice" disabled>${t}</button>`).join('');
-      els.message.textContent = '';
-      els.message.className = 'message';
-      els.progressText.textContent = cfg.totalTime === 0 ? '연습 모드' : '대기 중';
-      els.progressBar.style.width = '100%';
-      updateStats();
-      updateQuizTypeUI();
-    }
+    <div class="actions" style="justify-content:center; margin-top:8px;">
+      <button class="secondary" id="homeBtn">홈으로</button>
+      <button class="primary" id="restartBtn">다시하기</button>
+    </div>
 
-    function updateStats(){
-      const cfg = getConfig();
-      els.score.textContent = state.score;
-      els.combo.textContent = cfg.useCombo ? state.combo : '-';
-      els.time.textContent = cfg.showTimeInfinity && !state.playing ? '∞' : (cfg.totalTime === 0 ? '∞' : state.timeLeft);
+    <div class="footnote">
+      타입별 규칙이 실제로 다르게 적용됩니다.
+    </div>
+  </div>
+</div>
 
-      const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
-      els.accuracy.textContent = `${accuracy}%`;
+<script>
+const quizBank = [
+  { mode:"old", type:"인물", question:"노아가 만든 것은 무엇일까요?", choices:["방주","성막","돌판","우물"], answer:0, hint:"홍수와 관련된 이야기입니다." },
+  { mode:"old", type:"장소", question:"모세가 십계명을 받은 산은 어디일까요?", choices:["감람산","시내산","갈멜산","헤르몬산"], answer:1, hint:"출애굽 후 중요한 장면입니다." },
+  { mode:"old", type:"인물", question:"골리앗과 맞선 인물은 누구일까요?", choices:["사울","솔로몬","다윗","엘리야"], answer:2, hint:"훗날 왕이 됩니다." },
+  { mode:"old", type:"책", question:"시편은 주로 어떤 형식으로 이루어져 있을까요?", choices:["예언","편지","노래와 기도","역사 기록"], answer:2, hint:"찬양과 관련이 깊습니다." },
+  { mode:"old", type:"사건", question:"여리고 성은 어떻게 무너졌을까요?", choices:["지진으로","불로","군사 공격으로","하나님의 명령에 따른 행진 후"], answer:3, hint:"나팔 소리가 등장합니다." },
+  { mode:"old", type:"인물", question:"사자굴에 들어갔지만 보호받은 인물은 누구일까요?", choices:["다니엘","요셉","사무엘","욥"], answer:0, hint:"기도하는 인물로 잘 알려져 있습니다." },
+  { mode:"old", type:"인물", question:"큰 물고기 이야기와 관련된 선지자는 누구일까요?", choices:["요나","이사야","예레미야","호세아"], answer:0, hint:"니느웨와 연결됩니다." },
+  { mode:"old", type:"인물", question:"애굽 총리가 된 인물은 누구일까요?", choices:["아브라함","요셉","이삭","야곱"], answer:1, hint:"채색옷 이야기가 떠오릅니다." },
+  { mode:"new", type:"인물", question:"예수님을 낳은 마리아의 남편 이름은 무엇일까요?", choices:["야고보","요셉","사가랴","안드레"], answer:1, hint:"목수와 관련된 이미지가 있습니다." },
+  { mode:"new", type:"장소", question:"예수님께서 물을 포도주로 바꾸신 곳은 어디일까요?", choices:["가버나움","예루살렘","가나","벳새다"], answer:2, hint:"혼인잔치가 열렸던 곳입니다." },
+  { mode:"new", type:"인물", question:"예수님의 제자 중 세 번 부인한 인물은 누구일까요?", choices:["베드로","요한","빌립","도마"], answer:0, hint:"닭 울음과 연결됩니다." },
+  { mode:"new", type:"책", question:"초대교회 활동과 전도가 많이 기록된 책은 무엇일까요?", choices:["로마서","사도행전","히브리서","야고보서"], answer:1, hint:"사도들의 행적을 다룹니다." },
+  { mode:"new", type:"주제", question:"사랑장으로 잘 알려진 장은 어느 책에 있을까요?", choices:["고린도전서","갈라디아서","에베소서","빌립보서"], answer:0, hint:"13장이 유명합니다." },
+  { mode:"new", type:"인물", question:"다메섹 길에서 큰 변화를 겪은 인물은 누구일까요?", choices:["바울","디모데","바나바","실라"], answer:0, hint:"처음에는 교회를 핍박했습니다." },
+  { mode:"new", type:"사건", question:"오순절 성령 강림과 가장 직접 관련된 사건은 무엇일까요?", choices:["바다를 건넘","방언과 담대한 전파","성전 재건","감옥 탈출"], answer:1, hint:"초대교회 시작의 상징 같은 장면입니다." },
+  { mode:"new", type:"책", question:"예수님의 탄생 이야기와 비유가 많이 담긴 복음서는 무엇일까요?", choices:["마태복음","마가복음","누가복음","요한복음"], answer:2, hint:"의사로 알려진 저자와 연결됩니다." },
+  { mode:"theme", type:"주제", question:"믿음, 소망, 사랑 중 가장 크다고 강조되는 것은 무엇일까요?", choices:["믿음","소망","사랑","지혜"], answer:2, hint:"많은 사람이 암송하는 주제입니다." },
+  { mode:"theme", type:"주제", question:"기도할 때 가장 먼저 떠오르는 모범기도는 무엇일까요?", choices:["축복기도","주기도문","감사기도","회개기도"], answer:1, hint:"하늘에 계신 아버지로 시작합니다." },
+  { mode:"theme", type:"상징", question:"빛과 소금은 주로 누구를 가리키는 표현일까요?", choices:["왕들","제사장","제자들","천사들"], answer:2, hint:"세상 속에서 역할을 말합니다." },
+  { mode:"theme", type:"주제", question:"잃은 양 비유가 전하는 핵심은 무엇일까요?", choices:["부의 축적","잃은 자를 찾는 기쁨","전쟁 준비","지식 경쟁"], answer:1, hint:"찾아낸 후 기뻐하는 장면이 있습니다." },
+  { mode:"theme", type:"주제", question:"선한 사마리아인 비유의 핵심은 무엇일까요?", choices:["외모 판단","이웃 사랑의 실천","재산 보호","여행 준비"], answer:1, hint:"도와준 사람이 누구였는지 떠올려 보세요." },
+  { mode:"mixed", type:"말씀 개념", question:"성경에서 자주 강조되는 덕목 조합으로 가장 알맞은 것은 무엇일까요?", choices:["권력, 경쟁, 성공","믿음, 소망, 사랑","속도, 효율, 성과","부, 명예, 인기"], answer:1, hint:"신약에서 많이 알려진 조합입니다." }
+];
 
-      if(!state.playing){
-        els.progressText.textContent = cfg.totalTime === 0 ? '연습 모드' : '대기 중';
-        els.progressBar.style.width = '100%';
-        return;
-      }
+const typeConfigs = {
+  A: {
+    label:'A타입',
+    desc:'기본 연습형 퀴즈입니다. 시간 제한 없이 차분하게 문제를 풀 수 있어요.',
+    totalTime:0,
+    showTimeInfinity:true,
+    useCombo:false,
+    autoHint:false,
+    correctBase:10,
+    combo3:10,
+    combo5:10,
+    wrongPenalty:0,
+    rankMode:'practice'
+  },
+  B: {
+    label:'B타입',
+    desc:'점수 + 시간 + 콤보가 들어간 게임형 퀴즈입니다. 60초 동안 랜덤 문제를 풀 수 있어요.',
+    totalTime:60,
+    showTimeInfinity:false,
+    useCombo:true,
+    autoHint:false,
+    correctBase:10,
+    combo3:15,
+    combo5:20,
+    wrongPenalty:5,
+    rankMode:'arcade'
+  },
+  C: {
+    label:'C타입',
+    desc:'학습형 퀴즈입니다. 힌트가 자동으로 표시되고 75초 동안 부담 없이 풀 수 있어요.',
+    totalTime:75,
+    showTimeInfinity:false,
+    useCombo:false,
+    autoHint:true,
+    correctBase:8,
+    combo3:8,
+    combo5:8,
+    wrongPenalty:2,
+    rankMode:'learning'
+  },
+  D: {
+    label:'D타입',
+    desc:'도전형 퀴즈입니다. 45초 안에 빠르게 풀어야 하며 점수 변동이 더 큽니다.',
+    totalTime:45,
+    showTimeInfinity:false,
+    useCombo:true,
+    autoHint:false,
+    correctBase:12,
+    combo3:18,
+    combo5:25,
+    wrongPenalty:7,
+    rankMode:'challenge'
+  }
+};
 
-      if(cfg.totalTime === 0){
-        els.progressText.textContent = `${state.answered}문제 풀이`;
-        els.progressBar.style.width = '100%';
-      } else {
-        els.progressText.textContent = `${cfg.totalTime - state.timeLeft}초 진행`;
-        els.progressBar.style.width = `${(state.timeLeft / cfg.totalTime) * 100}%`;
-      }
-    }
+const state = {
+  selectedMode:'mixed',
+  quizType:'B',
+  timer:null,
+  totalTime:60,
+  timeLeft:60,
+  score:0,
+  combo:0,
+  answered:0,
+  correct:0,
+  current:null,
+  playing:false,
+  usedIndexes:[]
+};
 
-    function buildQuestion(){
-      const pool = getPool();
-      if(pool.length === 0) return null;
+const els = {
+  score:document.getElementById('score'),
+  time:document.getElementById('time'),
+  combo:document.getElementById('combo'),
+  accuracy:document.getElementById('accuracy'),
+  qMeta:document.getElementById('qMeta'),
+  question:document.getElementById('question'),
+  choices:document.getElementById('choices'),
+  message:document.getElementById('message'),
+  hintBtn:document.getElementById('hintBtn'),
+  startBtn:document.getElementById('startBtn'),
+  progressText:document.getElementById('progressText'),
+  progressBar:document.getElementById('progressBar'),
+  overlay:document.getElementById('overlay'),
+  finalScore:document.getElementById('finalScore'),
+  finalAccuracy:document.getElementById('finalAccuracy'),
+  rank:document.getElementById('rank'),
+  resultText:document.getElementById('resultText'),
+  restartBtn:document.getElementById('restartBtn'),
+  homeBtn:document.getElementById('homeBtn'),
+  modeRow:document.getElementById('modeRow'),
+  typeRow:document.getElementById('typeRow'),
+  quizTypeLabel:document.getElementById('quizTypeLabel'),
+  quizTypeDesc:document.getElementById('quizTypeDesc'),
+  startScreen:document.getElementById('startScreen'),
+  homeStartBtn:document.getElementById('homeStartBtn'),
+  homeTypeGrid:document.getElementById('homeTypeGrid'),
+  homeModeGrid:document.getElementById('homeModeGrid')
+};
 
-      let candidates = pool
-        .map((q, idx) => ({ q, idx }))
-        .filter(item => !state.usedIndexes.includes(item.idx + '_' + state.selectedMode + '_' + state.quizType));
+function setAppHeight(){
+  document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+}
+window.addEventListener('resize', setAppHeight);
+window.addEventListener('orientationchange', setAppHeight);
+setAppHeight();
 
-      if(candidates.length === 0){
-        state.usedIndexes = [];
-        candidates = pool.map((q, idx) => ({ q, idx }));
-      }
+function getConfig(){
+  return typeConfigs[state.quizType];
+}
 
-      const picked = candidates[Math.floor(Math.random() * candidates.length)];
-      state.usedIndexes.push(picked.idx + '_' + state.selectedMode + '_' + state.quizType);
+function shuffle(arr){
+  const copy = [...arr];
+  for(let i = copy.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
 
-      const original = picked.q;
-      const answerText = original.choices[original.answer];
-      const shuffledChoices = shuffle(
-        original.choices.map((text, i) => ({ text, correct: i === original.answer }))
-      );
-      const newAnswerIndex = shuffledChoices.findIndex(c => c.correct);
+function getPool(){
+  if(state.selectedMode === 'mixed') return quizBank;
+  return quizBank.filter(q => q.mode === state.selectedMode || q.mode === 'mixed');
+}
 
-      return {
-        type: original.type,
-        mode: original.mode,
-        question: original.question,
-        hint: original.hint,
-        choices: shuffledChoices.map(c => c.text),
-        answer: newAnswerIndex,
-        answerText
-      };
-    }
+function labelMode(mode){
+  return ({ mixed:'전체', old:'구약', new:'신약', theme:'주제' })[mode] || '전체';
+}
 
-    function renderQuestion(){
-      state.current = buildQuestion();
-      if(!state.current) return;
+function syncTypeButtons(){
+  [...els.typeRow.querySelectorAll('.pill')].forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === state.quizType);
+  });
+  [...els.homeTypeGrid.querySelectorAll('.home-card')].forEach(card => {
+    card.classList.toggle('active', card.dataset.type === state.quizType);
+  });
+}
 
-      els.qMeta.textContent = `${getConfig().label} · ${labelMode(state.selectedMode)} · ${state.current.type}`;
-      els.question.textContent = state.current.question;
-      els.message.textContent = '';
-      els.message.className = 'message';
+function syncModeButtons(){
+  [...els.modeRow.querySelectorAll('.pill')].forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === state.selectedMode);
+  });
+  [...els.homeModeGrid.querySelectorAll('.home-card')].forEach(card => {
+    card.classList.toggle('active', card.dataset.mode === state.selectedMode);
+  });
+}
 
-      els.choices.innerHTML = state.current.choices.map((choice, idx) => {
-        const alpha = ['A','B','C','D'][idx] || '';
-        return `<button class="choice" data-index="${idx}">${alpha}. ${choice}</button>`;
-      }).join('');
+function updateQuizTypeUI(){
+  const cfg = getConfig();
+  els.quizTypeLabel.textContent = cfg.label;
+  els.quizTypeDesc.textContent = cfg.desc;
+  els.time.textContent = cfg.showTimeInfinity && !state.playing ? '∞' : (cfg.totalTime === 0 ? '∞' : state.timeLeft);
+  els.hintBtn.style.display = state.quizType === 'C' ? 'none' : 'inline-block';
+  syncTypeButtons();
+  syncModeButtons();
+}
 
-      [...els.choices.querySelectorAll('.choice')].forEach(btn => {
-        btn.addEventListener('click', () => answerQuestion(Number(btn.dataset.index)));
-      });
+function resetUIForIdle(){
+  const cfg = getConfig();
+  clearInterval(state.timer);
+  state.playing = false;
+  state.current = null;
+  state.timeLeft = cfg.totalTime;
+  els.qMeta.textContent = '준비 완료';
+  els.question.textContent = '시작 버튼을 누르면 문제가 나옵니다.';
+  els.choices.innerHTML = ['A. 보기 1','B. 보기 2','C. 보기 3','D. 보기 4']
+    .map(t => `<button class="choice" disabled>${t}</button>`).join('');
+  els.message.textContent = '';
+  els.message.className = 'message';
+  els.progressText.textContent = cfg.totalTime === 0 ? '연습 모드' : '대기 중';
+  els.progressBar.style.width = '100%';
+  updateStats();
+  updateQuizTypeUI();
+}
 
-      if(getConfig().autoHint){
-        els.message.textContent = `힌트: ${state.current.hint}`;
-        els.message.className = 'message warn';
-      }
-    }
+function updateStats(){
+  const cfg = getConfig();
+  els.score.textContent = state.score;
+  els.combo.textContent = cfg.useCombo ? state.combo : '-';
+  els.time.textContent = cfg.showTimeInfinity && !state.playing ? '∞' : (cfg.totalTime === 0 ? '∞' : state.timeLeft);
 
-    function getCorrectScore(){
-      const cfg = getConfig();
-      if(!cfg.useCombo) return cfg.correctBase;
-      if(state.combo >= 5) return cfg.combo5;
-      if(state.combo >= 3) return cfg.combo3;
-      return cfg.correctBase;
-    }
+  const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
+  els.accuracy.textContent = `${accuracy}%`;
 
-    function answerQuestion(index){
-      if(!state.playing || !state.current) return;
+  if(!state.playing){
+    els.progressText.textContent = cfg.totalTime === 0 ? '연습 모드' : '대기 중';
+    els.progressBar.style.width = '100%';
+    return;
+  }
 
-      const cfg = getConfig();
-      const buttons = [...els.choices.querySelectorAll('.choice')];
-      buttons.forEach(b => b.disabled = true);
-      state.answered += 1;
+  if(cfg.totalTime === 0){
+    els.progressText.textContent = `${state.answered}문제 풀이`;
+    els.progressBar.style.width = '100%';
+  } else {
+    els.progressText.textContent = `${cfg.totalTime - state.timeLeft}초 진행`;
+    els.progressBar.style.width = `${(state.timeLeft / cfg.totalTime) * 100}%`;
+  }
+}
 
-      if(index === state.current.answer){
-        state.correct += 1;
-        if(cfg.useCombo){
-          state.combo += 1;
-        } else {
-          state.combo = 0;
-        }
+function buildQuestion(){
+  const pool = getPool();
+  if(pool.length === 0) return null;
 
-        const gained = getCorrectScore();
-        state.score += gained;
-        buttons[index].classList.add('correct');
+  let candidates = pool
+    .map((q, idx) => ({ q, idx }))
+    .filter(item => !state.usedIndexes.includes(item.idx + '_' + state.selectedMode + '_' + state.quizType));
 
-        if(cfg.useCombo && state.combo >= 3){
-          els.message.textContent = `정답! +${gained}점 · ${state.combo}콤보`;
-        } else {
-          els.message.textContent = `정답! +${gained}점`;
-        }
-        els.message.className = 'message ok';
-      } else {
-        state.combo = 0;
-        state.score = Math.max(0, state.score - cfg.wrongPenalty);
-        buttons[index].classList.add('wrong');
-        buttons[state.current.answer].classList.add('correct');
-        els.message.textContent = `오답! 정답은 “${state.current.answerText}” 입니다.${cfg.wrongPenalty > 0 ? ` -${cfg.wrongPenalty}점` : ''}`;
-        els.message.className = 'message bad';
-      }
+  if(candidates.length === 0){
+    state.usedIndexes = [];
+    candidates = pool.map((q, idx) => ({ q, idx }));
+  }
 
-      updateStats();
+  const picked = candidates[Math.floor(Math.random() * candidates.length)];
+  state.usedIndexes.push(picked.idx + '_' + state.selectedMode + '_' + state.quizType);
 
-      setTimeout(() => {
-        if(state.playing){
-          renderQuestion();
-        }
-      }, 800);
-    }
+  const original = picked.q;
+  const answerText = original.choices[original.answer];
+  const shuffledChoices = shuffle(
+    original.choices.map((text, i) => ({ text, correct: i === original.answer }))
+  );
+  const newAnswerIndex = shuffledChoices.findIndex(c => c.correct);
 
-    function showHint(){
-      if(!state.playing || !state.current) return;
-      els.message.textContent = `힌트: ${state.current.hint}`;
-      els.message.className = 'message warn';
-    }
+  return {
+    type:original.type,
+    mode:original.mode,
+    question:original.question,
+    hint:original.hint,
+    choices:shuffledChoices.map(c => c.text),
+    answer:newAnswerIndex,
+    answerText
+  };
+}
 
-    function startGame(){
-      const cfg = getConfig();
-      clearInterval(state.timer);
+function renderQuestion(){
+  state.current = buildQuestion();
+  if(!state.current) return;
 
-      state.playing = true;
-      state.totalTime = cfg.totalTime;
-      state.timeLeft = cfg.totalTime;
-      state.score = 0;
+  els.qMeta.textContent = `${getConfig().label} · ${labelMode(state.selectedMode)} · ${state.current.type}`;
+  els.question.textContent = state.current.question;
+  els.message.textContent = '';
+  els.message.className = 'message';
+
+  els.choices.innerHTML = state.current.choices.map((choice, idx) => {
+    const alpha = ['A','B','C','D'][idx] || '';
+    return `<button class="choice" data-index="${idx}">${alpha}. ${choice}</button>`;
+  }).join('');
+
+  [...els.choices.querySelectorAll('.choice')].forEach(btn => {
+    btn.addEventListener('click', () => answerQuestion(Number(btn.dataset.index)));
+  });
+
+  if(getConfig().autoHint){
+    els.message.textContent = `힌트: ${state.current.hint}`;
+    els.message.className = 'message warn';
+  }
+}
+
+function getCorrectScore(){
+  const cfg = getConfig();
+  if(!cfg.useCombo) return cfg.correctBase;
+  if(state.combo >= 5) return cfg.combo5;
+  if(state.combo >= 3) return cfg.combo3;
+  return cfg.correctBase;
+}
+
+function answerQuestion(index){
+  if(!state.playing || !state.current) return;
+
+  const cfg = getConfig();
+  const buttons = [...els.choices.querySelectorAll('.choice')];
+  buttons.forEach(b => b.disabled = true);
+  state.answered += 1;
+
+  if(index === state.current.answer){
+    state.correct += 1;
+    if(cfg.useCombo){
+      state.combo += 1;
+    } else {
       state.combo = 0;
-      state.answered = 0;
-      state.correct = 0;
-      state.usedIndexes = [];
-      els.overlay.classList.remove('show');
+    }
 
-      updateStats();
-      updateQuizTypeUI();
+    const gained = getCorrectScore();
+    state.score += gained;
+    buttons[index].classList.add('correct');
+
+    if(cfg.useCombo && state.combo >= 3){
+      els.message.textContent = `정답! +${gained}점 · ${state.combo}콤보`;
+    } else {
+      els.message.textContent = `정답! +${gained}점`;
+    }
+    els.message.className = 'message ok';
+  } else {
+    state.combo = 0;
+    state.score = Math.max(0, state.score - cfg.wrongPenalty);
+    buttons[index].classList.add('wrong');
+    buttons[state.current.answer].classList.add('correct');
+    els.message.textContent = `오답! 정답은 “${state.current.answerText}” 입니다.${cfg.wrongPenalty > 0 ? ` -${cfg.wrongPenalty}점` : ''}`;
+    els.message.className = 'message bad';
+  }
+
+  updateStats();
+
+  setTimeout(() => {
+    if(state.playing){
       renderQuestion();
-
-      if(cfg.totalTime > 0){
-        state.timer = setInterval(() => {
-          state.timeLeft -= 1;
-          updateStats();
-          if(state.timeLeft <= 0){
-            endGame();
-          }
-        }, 1000);
-      }
     }
+  }, 800);
+}
 
-    function getRank(score, accuracy){
-      const mode = getConfig().rankMode;
+function showHint(){
+  if(!state.playing || !state.current) return;
+  els.message.textContent = `힌트: ${state.current.hint}`;
+  els.message.className = 'message warn';
+}
 
-      if(mode === 'practice'){
-        if(accuracy >= 95 && score >= 100) return 'S';
-        if(accuracy >= 85 && score >= 70) return 'A';
-        if(accuracy >= 70 && score >= 40) return 'B';
-        if(accuracy >= 50) return 'C';
-        return 'D';
-      }
+function startGame(){
+  const cfg = getConfig();
+  clearInterval(state.timer);
 
-      if(mode === 'learning'){
-        if(accuracy >= 90 && score >= 80) return 'S';
-        if(accuracy >= 80 && score >= 60) return 'A';
-        if(accuracy >= 65 && score >= 40) return 'B';
-        if(accuracy >= 45) return 'C';
-        return 'D';
-      }
+  state.playing = true;
+  state.totalTime = cfg.totalTime;
+  state.timeLeft = cfg.totalTime;
+  state.score = 0;
+  state.combo = 0;
+  state.answered = 0;
+  state.correct = 0;
+  state.usedIndexes = [];
+  els.overlay.classList.remove('show');
+  els.startScreen.classList.add('hide');
 
-      if(mode === 'challenge'){
-        if(score >= 160 && accuracy >= 85) return 'S';
-        if(score >= 120 && accuracy >= 75) return 'A';
-        if(score >= 80 && accuracy >= 60) return 'B';
-        if(score >= 40 && accuracy >= 45) return 'C';
-        return 'D';
-      }
+  updateStats();
+  updateQuizTypeUI();
+  renderQuestion();
 
-      if(score >= 180 && accuracy >= 85) return 'S';
-      if(score >= 130 && accuracy >= 75) return 'A';
-      if(score >= 90 && accuracy >= 60) return 'B';
-      if(score >= 50 && accuracy >= 45) return 'C';
-      return 'D';
-    }
-
-    function endGame(){
-      clearInterval(state.timer);
-      state.playing = false;
-      [...els.choices.querySelectorAll('.choice')].forEach(b => b.disabled = true);
-
-      const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
-      const rank = getRank(state.score, accuracy);
-
-      els.finalScore.textContent = state.score;
-      els.finalAccuracy.textContent = `${accuracy}%`;
-      els.rank.textContent = rank;
-      els.resultText.textContent = `총 ${state.answered}문제 중 ${state.correct}문제를 맞혔습니다.`;
-      els.overlay.classList.add('show');
+  if(cfg.totalTime > 0){
+    state.timer = setInterval(() => {
+      state.timeLeft -= 1;
       updateStats();
-    }
-
-    els.startBtn.addEventListener('click', startGame);
-    els.restartBtn.addEventListener('click', startGame);
-    els.closeBtn.addEventListener('click', () => els.overlay.classList.remove('show'));
-    els.hintBtn.addEventListener('click', showHint);
-
-    els.modeRow.addEventListener('click', (e) => {
-      const btn = e.target.closest('.pill');
-      if(!btn) return;
-
-      [...els.modeRow.querySelectorAll('.pill')].forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.selectedMode = btn.dataset.mode;
-
-      if(!state.playing) resetUIForIdle();
-    });
-
-    els.typeRow.addEventListener('click', (e) => {
-      const btn = e.target.closest('.pill');
-      if(!btn) return;
-
-      [...els.typeRow.querySelectorAll('.pill')].forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.quizType = btn.dataset.type;
-
-      if(!state.playing) {
-        resetUIForIdle();
-      } else {
-        updateQuizTypeUI();
+      if(state.timeLeft <= 0){
+        endGame();
       }
-    });
+    }, 1000);
+  }
+}
 
-    resetUIForIdle();
-  </script>
+function getRank(score, accuracy){
+  const mode = getConfig().rankMode;
+
+  if(mode === 'practice'){
+    if(accuracy >= 95 && score >= 100) return 'S';
+    if(accuracy >= 85 && score >= 70) return 'A';
+    if(accuracy >= 70 && score >= 40) return 'B';
+    if(accuracy >= 50) return 'C';
+    return 'D';
+  }
+
+  if(mode === 'learning'){
+    if(accuracy >= 90 && score >= 80) return 'S';
+    if(accuracy >= 80 && score >= 60) return 'A';
+    if(accuracy >= 65 && score >= 40) return 'B';
+    if(accuracy >= 45) return 'C';
+    return 'D';
+  }
+
+  if(mode === 'challenge'){
+    if(score >= 160 && accuracy >= 85) return 'S';
+    if(score >= 120 && accuracy >= 75) return 'A';
+    if(score >= 80 && accuracy >= 60) return 'B';
+    if(score >= 40 && accuracy >= 45) return 'C';
+    return 'D';
+  }
+
+  if(score >= 180 && accuracy >= 85) return 'S';
+  if(score >= 130 && accuracy >= 75) return 'A';
+  if(score >= 90 && accuracy >= 60) return 'B';
+  if(score >= 50 && accuracy >= 45) return 'C';
+  return 'D';
+}
+
+function endGame(){
+  clearInterval(state.timer);
+  state.playing = false;
+  [...els.choices.querySelectorAll('.choice')].forEach(b => b.disabled = true);
+
+  const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
+  const rank = getRank(state.score, accuracy);
+
+  els.finalScore.textContent = state.score;
+  els.finalAccuracy.textContent = `${accuracy}%`;
+  els.rank.textContent = rank;
+  els.resultText.textContent = `총 ${state.answered}문제 중 ${state.correct}문제를 맞혔습니다.`;
+  els.overlay.classList.add('show');
+  updateStats();
+}
+
+function goHome(){
+  clearInterval(state.timer);
+  state.playing = false;
+  els.overlay.classList.remove('show');
+  els.startScreen.classList.remove('hide');
+  resetUIForIdle();
+}
+
+els.startBtn.addEventListener('click', startGame);
+els.restartBtn.addEventListener('click', startGame);
+els.homeBtn.addEventListener('click', goHome);
+els.hintBtn.addEventListener('click', showHint);
+els.homeStartBtn.addEventListener('click', startGame);
+
+els.modeRow.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pill');
+  if(!btn) return;
+  state.selectedMode = btn.dataset.mode;
+  syncModeButtons();
+  if(!state.playing) resetUIForIdle();
+});
+
+els.typeRow.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pill');
+  if(!btn) return;
+  state.quizType = btn.dataset.type;
+  syncTypeButtons();
+  if(!state.playing) resetUIForIdle();
+  else updateQuizTypeUI();
+});
+
+els.homeTypeGrid.addEventListener('click', (e) => {
+  const card = e.target.closest('.home-card');
+  if(!card) return;
+  state.quizType = card.dataset.type;
+  syncTypeButtons();
+  updateQuizTypeUI();
+});
+
+els.homeModeGrid.addEventListener('click', (e) => {
+  const card = e.target.closest('.home-card');
+  if(!card) return;
+  state.selectedMode = card.dataset.mode;
+  syncModeButtons();
+});
+
+resetUIForIdle();
+</script>
 </body>
 </html>
