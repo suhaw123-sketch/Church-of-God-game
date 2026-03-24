@@ -318,12 +318,11 @@ button.danger{
   color:#991b1b;
 }
 
-body.playing #startBtn{
-  display:none;
-}
-
-body.playing #soundBtn{
-  display:none;
+/* 퀴즈 진행 중 방해 요소 숨김 */
+body.playing #startBtn,
+body.playing #soundBtn,
+body.playing #topSoundBtn{
+  display:none !important;
 }
 
 body.playing .actions{
@@ -514,6 +513,23 @@ body.playing .actions{
   color:#dbeafe;
 }
 
+.name-input{
+  width:100%;
+  height:54px;
+  border:none;
+  outline:none;
+  border-radius:16px;
+  padding:0 16px;
+  font-size:16px;
+  font-weight:700;
+  background:rgba(255,255,255,.92);
+  color:#0f172a;
+}
+
+.name-input::placeholder{
+  color:#94a3b8;
+}
+
 .start-main-btn{
   margin-top:18px;
   width:100%;
@@ -648,8 +664,13 @@ body.playing .actions{
     <h1 class="start-title">성경 말씀<br>퀴즈 게임</h1>
     <p class="start-sub">
       원하는 타입과 범위를 고른 뒤 시작해 보세요.<br>
-      최고 점수와 최근 기록이 자동으로 저장됩니다.
+      개인별 최고기록이 자동 저장됩니다.
     </p>
+
+    <div class="home-section">
+      <div class="home-label">이름 입력</div>
+      <input id="playerNameInput" class="name-input" type="text" maxlength="12" placeholder="이름을 입력하세요" />
+    </div>
 
     <div class="home-section">
       <div class="home-label">퀴즈 타입 선택</div>
@@ -696,10 +717,10 @@ body.playing .actions{
     </div>
 
     <button class="start-main-btn" id="homeStartBtn">▶ 게임 시작</button>
-    <div class="start-tip">소리 설정은 게임 화면 상단 오른쪽 버튼으로 바꿀 수 있어요.</div>
+    <div class="start-tip">퀴즈를 푸는 중에는 시작버튼과 소리버튼이 숨겨집니다.</div>
 
     <div class="rank-panel">
-      <div class="home-label">내 기록</div>
+      <div class="home-label">전체 최고 기록</div>
       <div class="rank-top">
         <div class="rank-box">
           <div class="rk">최고 점수</div>
@@ -715,8 +736,8 @@ body.playing .actions{
         </div>
       </div>
 
-      <div class="home-label">최근 플레이 5개</div>
-      <div class="rank-list" id="recentList"></div>
+      <div class="home-label">개인별 최고 기록</div>
+      <div class="rank-list" id="playerRankList"></div>
 
       <div class="small-actions">
         <button class="ghost" id="refreshRankBtn">기록 새로고침</button>
@@ -818,7 +839,13 @@ body.playing .actions{
     </div>
 
     <div class="result-rank-panel">
-      <div class="result-rank-title">저장된 기록</div>
+      <div class="result-rank-title">이번 플레이어</div>
+      <div class="result-rank-line"><span>이름</span><strong id="resultPlayerName">-</strong></div>
+      <div class="result-rank-line"><span>개인 최고 점수</span><strong id="resultPlayerBestScore">0</strong></div>
+    </div>
+
+    <div class="result-rank-panel">
+      <div class="result-rank-title">저장된 전체 기록</div>
       <div class="result-rank-line"><span>최고 점수</span><strong id="resultBestScore">0</strong></div>
       <div class="result-rank-line"><span>최고 랭크</span><strong id="resultBestRank">-</strong></div>
       <div class="result-rank-line"><span>최고 정답률</span><strong id="resultBestAccuracy">0%</strong></div>
@@ -831,7 +858,7 @@ body.playing .actions{
     </div>
 
     <div class="footnote">
-      최고 기록과 최근 플레이 기록 5개가 브라우저에 저장됩니다.
+      개인별 최고기록과 전체 최고기록이 브라우저에 저장됩니다.
     </div>
   </div>
 </div>
@@ -869,7 +896,7 @@ const typeConfigs = {
   D: { label:'D타입', desc:'도전형 퀴즈입니다. 45초 안에 빠르게 풀어야 하며 점수 변동이 더 큽니다.', totalTime:45, showTimeInfinity:false, useCombo:true, autoHint:false, correctBase:12, combo3:18, combo5:25, wrongPenalty:7, rankMode:'challenge' }
 };
 
-const STORAGE_KEY = 'bible_quiz_ranking_v1';
+const STORAGE_KEY = 'bible_quiz_personal_ranking_v1';
 
 const state = {
   selectedMode:'mixed',
@@ -884,7 +911,8 @@ const state = {
   current:null,
   playing:false,
   usedIndexes:[],
-  soundOn:true
+  soundOn:true,
+  playerName:'손님'
 };
 
 const els = {
@@ -918,15 +946,18 @@ const els = {
   homeStartBtn:document.getElementById('homeStartBtn'),
   homeTypeGrid:document.getElementById('homeTypeGrid'),
   homeModeGrid:document.getElementById('homeModeGrid'),
+  playerNameInput:document.getElementById('playerNameInput'),
   bestScoreBox:document.getElementById('bestScoreBox'),
   bestRankBox:document.getElementById('bestRankBox'),
   bestAccuracyBox:document.getElementById('bestAccuracyBox'),
-  recentList:document.getElementById('recentList'),
+  playerRankList:document.getElementById('playerRankList'),
   refreshRankBtn:document.getElementById('refreshRankBtn'),
   clearRankBtn:document.getElementById('clearRankBtn'),
   resultBestScore:document.getElementById('resultBestScore'),
   resultBestRank:document.getElementById('resultBestRank'),
-  resultBestAccuracy:document.getElementById('resultBestAccuracy')
+  resultBestAccuracy:document.getElementById('resultBestAccuracy'),
+  resultPlayerName:document.getElementById('resultPlayerName'),
+  resultPlayerBestScore:document.getElementById('resultPlayerBestScore')
 };
 
 function setAppHeight(){
@@ -936,6 +967,7 @@ window.addEventListener('resize', setAppHeight);
 window.addEventListener('orientationchange', setAppHeight);
 setAppHeight();
 
+/* 오디오 */
 let audioCtx = null;
 
 function initAudio(){
@@ -1011,12 +1043,13 @@ function toggleSound(){
   updateSoundButtons();
 }
 
+/* 랭킹 */
 function getDefaultRanking(){
   return {
     bestScore: 0,
     bestRank: '-',
     bestAccuracy: 0,
-    recent: []
+    players: []
   };
 }
 
@@ -1039,7 +1072,7 @@ function loadRanking(){
       bestScore: Number(data.bestScore || 0),
       bestRank: data.bestRank || '-',
       bestAccuracy: Number(data.bestAccuracy || 0),
-      recent: Array.isArray(data.recent) ? data.recent.slice(0, 5) : []
+      players: Array.isArray(data.players) ? data.players : []
     };
   }catch(e){
     return getDefaultRanking();
@@ -1048,6 +1081,11 @@ function loadRanking(){
 
 function saveRanking(data){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function clearRanking(){
+  localStorage.removeItem(STORAGE_KEY);
+  renderRankingUI();
 }
 
 function getNowLabel(){
@@ -1060,34 +1098,47 @@ function getNowLabel(){
   return `${yy}.${mm}.${dd} ${hh}:${mi}`;
 }
 
+function modeText(mode){
+  return ({ mixed:'전체', old:'구약', new:'신약', theme:'주제' })[mode] || '전체';
+}
+
 function savePlayRecord(score, accuracy, rank){
   const data = loadRanking();
+  const name = (state.playerName || '손님').trim() || '손님';
 
   data.bestScore = Math.max(data.bestScore, score);
   data.bestAccuracy = Math.max(data.bestAccuracy, accuracy);
   data.bestRank = numberToRank(Math.max(rankToNumber(data.bestRank), rankToNumber(rank)));
 
-  data.recent.unshift({
-    score,
-    accuracy,
-    rank,
-    quizType: state.quizType,
-    mode: state.selectedMode,
-    playedAt: getNowLabel()
+  let found = data.players.find(p => p.name === name);
+
+  if(found){
+    found.bestScore = Math.max(found.bestScore, score);
+    found.bestAccuracy = Math.max(found.bestAccuracy, accuracy);
+    found.bestRank = numberToRank(Math.max(rankToNumber(found.bestRank), rankToNumber(rank)));
+    found.lastPlayedAt = getNowLabel();
+    found.quizType = state.quizType;
+    found.mode = state.selectedMode;
+  } else {
+    data.players.push({
+      name,
+      bestScore: score,
+      bestAccuracy: accuracy,
+      bestRank: rank,
+      lastPlayedAt: getNowLabel(),
+      quizType: state.quizType,
+      mode: state.selectedMode
+    });
+  }
+
+  data.players.sort((a, b) => {
+    if(b.bestScore !== a.bestScore) return b.bestScore - a.bestScore;
+    if(rankToNumber(b.bestRank) !== rankToNumber(a.bestRank)) return rankToNumber(b.bestRank) - rankToNumber(a.bestRank);
+    return b.bestAccuracy - a.bestAccuracy;
   });
 
-  data.recent = data.recent.slice(0, 5);
   saveRanking(data);
   renderRankingUI();
-}
-
-function clearRanking(){
-  localStorage.removeItem(STORAGE_KEY);
-  renderRankingUI();
-}
-
-function modeText(mode){
-  return ({ mixed:'전체', old:'구약', new:'신약', theme:'주제' })[mode] || '전체';
 }
 
 function renderRankingUI(){
@@ -1101,24 +1152,25 @@ function renderRankingUI(){
   els.resultBestRank.textContent = data.bestRank;
   els.resultBestAccuracy.textContent = `${data.bestAccuracy}%`;
 
-  if(!data.recent.length){
-    els.recentList.innerHTML = `<div class="rank-empty">아직 저장된 플레이 기록이 없습니다.</div>`;
+  if(!data.players.length){
+    els.playerRankList.innerHTML = `<div class="rank-empty">아직 저장된 개인 랭킹이 없습니다.</div>`;
     return;
   }
 
-  els.recentList.innerHTML = data.recent.map((item, idx) => `
+  els.playerRankList.innerHTML = data.players.slice(0, 10).map((item, idx) => `
     <div class="rank-row">
       <div class="badge">#${idx + 1}</div>
       <div>
-        <div>${item.quizType} · ${modeText(item.mode)}</div>
-        <div class="meta">${item.playedAt}</div>
+        <div>${item.name}</div>
+        <div class="meta">${item.bestRank} · ${modeText(item.mode)} · ${item.quizType}</div>
       </div>
-      <div>${item.rank}</div>
-      <div>${item.score}점</div>
+      <div>${item.bestAccuracy}%</div>
+      <div>${item.bestScore}점</div>
     </div>
   `).join('');
 }
 
+/* 게임 */
 function getConfig(){
   return typeConfigs[state.quizType];
 }
@@ -1340,6 +1392,9 @@ async function startGame(){
   clearInterval(state.timer);
   document.body.classList.add('playing');
 
+  const inputName = (els.playerNameInput.value || '').trim();
+  state.playerName = inputName || '손님';
+
   const cfg = getConfig();
   state.playing = true;
   state.totalTime = cfg.totalTime;
@@ -1405,6 +1460,7 @@ function getRank(score, accuracy){
 function endGame(){
   clearInterval(state.timer);
   state.playing = false;
+  document.body.classList.remove('playing');
   [...els.choices.querySelectorAll('.choice')].forEach(b => b.disabled = true);
 
   const accuracy = state.answered ? Math.round((state.correct / state.answered) * 100) : 0;
@@ -1412,10 +1468,16 @@ function endGame(){
 
   savePlayRecord(state.score, accuracy, rank);
 
+  const data = loadRanking();
+  const me = data.players.find(p => p.name === state.playerName);
+
   els.finalScore.textContent = state.score;
   els.finalAccuracy.textContent = `${accuracy}%`;
   els.rank.textContent = rank;
   els.resultText.textContent = `총 ${state.answered}문제 중 ${state.correct}문제를 맞혔습니다.`;
+  els.resultPlayerName.textContent = state.playerName;
+  els.resultPlayerBestScore.textContent = me ? me.bestScore : state.score;
+
   els.overlay.classList.add('show');
   updateStats();
   renderRankingUI();
@@ -1431,6 +1493,7 @@ function goHome(){
   resetUIForIdle();
 }
 
+/* 이벤트 */
 els.startBtn.addEventListener('click', startGame);
 els.restartBtn.addEventListener('click', startGame);
 els.homeBtn.addEventListener('click', goHome);
@@ -1484,7 +1547,7 @@ els.homeModeGrid.addEventListener('click', (e) => {
 
 els.refreshRankBtn.addEventListener('click', renderRankingUI);
 els.clearRankBtn.addEventListener('click', () => {
-  if(confirm('저장된 랭킹 기록을 모두 삭제할까요?')){
+  if(confirm('저장된 개인 랭킹 기록을 모두 삭제할까요?')){
     clearRanking();
   }
 });
